@@ -1445,9 +1445,10 @@ __3857__ é o genérico, não projectado - [ver](https://epsg.io/3857)
 
 ```r
 #Consultar qual o sistema de coordenadas de uma shapefile
-st_set_crs(ODbike_250mANOS)
+st_set_crs(ODbike_250mANOS) (?)
 #Definir ou alterar o sistema de coordenadas
 st_crs(GRID) <- 4326 #meter a projecção WGS84
+CAOP2018aml<-st_transform(CAOP2018aml, 4326) #transformar projecção
 ```
 Limite de Lisboa
 

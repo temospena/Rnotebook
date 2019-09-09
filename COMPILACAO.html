@@ -1606,9 +1606,10 @@ write.table(TaxisORD,&quot;TaxisORD.txt&quot;,sep=&quot;\t&quot;,row.names=FALSE
 <strong>4326</strong> é o sistema usado pelo google e gps (WGS84) - <a href="https://epsg.io/4326">ver</a><br />
 <strong>3857</strong> é o genérico, não projectado - <a href="https://epsg.io/3857">ver</a></p>
 <pre class="r"><code>#Consultar qual o sistema de coordenadas de uma shapefile
-st_set_crs(ODbike_250mANOS)
+st_set_crs(ODbike_250mANOS) (?)
 #Definir ou alterar o sistema de coordenadas
-st_crs(GRID) &lt;- 4326 #meter a projecção WGS84</code></pre>
+st_crs(GRID) &lt;- 4326 #meter a projecção WGS84
+CAOP2018aml&lt;-st_transform(CAOP2018aml, 4326) #transformar projecção</code></pre>
 <p>Limite de Lisboa</p>
 <pre class="r"><code>#Importar o limite de Lisboa e projectar
 LisboaLimite &lt;-read_sf(&quot;D:/rosa/Dropbox/Tese/GIS/Lisboa_CAOP2015/Lisboa_Limite_CAOP2015_PNacoes.shp&quot;)
