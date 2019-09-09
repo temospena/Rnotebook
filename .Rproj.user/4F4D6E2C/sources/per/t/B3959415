@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567703118159.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "B3959415",
+    "lastKnownWriteTime" : 7310863255512440655,
+    "last_content_update" : 1567703118159,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "30589CEB",
+        "caption" : "Viagens",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Viagens&cache_key=30589CEB",
+        "displayedObservations" : 1078,
+        "environment" : "",
+        "object" : "Viagens",
+        "preview" : 0,
+        "totalObservations" : 1078,
+        "variables" : 13
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

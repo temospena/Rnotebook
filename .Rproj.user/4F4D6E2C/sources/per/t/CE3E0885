@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567617012657.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "CE3E0885",
+    "lastKnownWriteTime" : 7308604914264011873,
+    "last_content_update" : 1567617012657,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "EB8EB580",
+        "caption" : "CONTAGENSzonas",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=CONTAGENSzonas&cache_key=EB8EB580",
+        "displayedObservations" : 20,
+        "environment" : "",
+        "object" : "CONTAGENSzonas",
+        "preview" : 0,
+        "totalObservations" : 20,
+        "variables" : 40
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

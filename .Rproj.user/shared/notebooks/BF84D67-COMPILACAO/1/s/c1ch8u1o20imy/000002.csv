@@ -1,0 +1,15 @@
+"0","button.btn.collapsed:before
+{
+    content:'+' ;
+    display:block;
+    width:15px;
+}
+button.btn:before
+{
+    content:'-' ;
+    display:block;
+    width:15px;
+}"
+"2","'css' is not recognized as an internal or external command,
+operable program or batch file.
+"

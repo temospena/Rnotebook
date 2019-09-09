@@ -1,0 +1,8 @@
+"0","#barras com realce dos quartis nas legendas"
+"0","ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN, fill = quartis)) +"
+"0","  geom_bar(stat=""identity"") +geom_text(aes(label=ENshort), data=subset(MCTRIGGERS,quartis==""75-100%""), size=5, hjust = -0.05, angle =45, vjust=-0.3) +"
+"0","  geom_text(aes(label=ENshort), data=subset(MCTRIGGERS,quartis==""50-75%""), size=3, hjust = -0.05, angle =45, vjust=-0.3, color=""azure4"") +"
+"0","  geom_text(aes(label=ENshort), data=subset(MCTRIGGERS,names==""17""), size=3, hjust = -0.05, angle =45, vjust=-0.3) +"
+"0","  labs(title = ""Triggers for cycling - relevance"", x = ""Triggers of Cyclists"", y = ""Mean of weighted scores"") +"
+"0","  theme_classic() +theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), legend.position=c(0.8,0.8), plot.title = element_text(size=22, hjust=0.5)) +"
+"0","  scale_fill_manual(values = wes_palette(""GrandBudapest1""), ""Frequency of choices"")  + coord_cartesian(xlim=c(0,45)) + ylim(NA, 0.14)"

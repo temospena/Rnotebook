@@ -1,0 +1,3 @@
+"0","ResultyG_1 <- likert(Personalityyy[c(1:6)], grouping=Personalityyy$CHANGE_Class3)"
+"0","ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$results[,1])"
+"0","plot(ResultyGs_1, type=""bar"", centered=FALSE)"

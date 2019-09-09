@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567101133699.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "13|19|26|0|\n27|61|81|0|\n82|34|86|0|\n473|21|496|0|\n1353|23|1375|3|\n1441|22|1453|0|\n1454|11|1475|0|\n",
+    "hash" : "3116552518",
+    "id" : "6B90C74A",
+    "lastKnownWriteTime" : 1567783078,
+    "last_content_update" : 1567783078119,
+    "path" : "D:/GIS/Rosix/COMPILACAO.Rmd",
+    "project_path" : "COMPILACAO.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "82,19",
+        "docOutlineVisible" : "1",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
