@@ -83,6 +83,7 @@ library(sf)
 library(ggmap)
 library(maptools)
 library(openrouteservice)
+library(googleway)
 library(stplanr) #package for sustainable transport planning
 
 #modelos, econometria, clusters, correlações
@@ -233,6 +234,10 @@ TABELA<-TABELA[is.na(TABELA$Modo0), -c(2,3,8:15)] #remover várias colunas segun
 #Extrair uma parte da tabela
 SubClustNC <-subset(SubNC, select=c(240,241))
 
+#reordenar tabela por variável
+TABELA <- TABELA[order(TABELA$ID_viagem),]
+TABELA <- TABELA[order(TABELA$Zona, TABELA$ID_viagem),] #por mais de uma variável
+TABELA <- TABELA[order(TABELA$Zona, -TABELA$ID_viagem),] #por mais de uma variável, com ordem decrescente na segunda
 
 #adicionar um ID a cada linha, em ordem sequencial
 TABELA$ID<-seq.int(nrow(TABELA))
@@ -275,6 +280,11 @@ TABELA$AA <- str_replace_all(TABELA$AA, '_', '-')
 #remover uma tabela do environment
 rm(CBARRIERS)
 rm(CBARRIERS,NMOTIVATORS) #mais do que uma
+
+
+#omitir o nome da tabela, para referir simplesmente à variável
+attach(TABELA)
+detach(TABELA) #reverter
 ```
 ###Mudar o tipo de variável
 
@@ -1445,17 +1455,18 @@ __3857__ é o genérico, não projectado - [ver](https://epsg.io/3857)
 
 ```r
 #Consultar qual o sistema de coordenadas de uma shapefile
-st_set_crs(ODbike_250mANOS) (?)
+st_geometry(ODbike_250mANOS)
 #Definir ou alterar o sistema de coordenadas
 st_crs(GRID) <- 4326 #meter a projecção WGS84
 CAOP2018aml<-st_transform(CAOP2018aml, 4326) #transformar projecção
+st_set_crs(ODbike_250mANOS)
 ```
 Limite de Lisboa
 
 ```r
 #Importar o limite de Lisboa e projectar
 LisboaLimite <-read_sf("D:/rosa/Dropbox/Tese/GIS/Lisboa_CAOP2015/Lisboa_Limite_CAOP2015_PNacoes.shp")
-st_transform(LisboaLimite,  crs = 4326)
+LisboaLimite <-st_transform(LisboaLimite,  crs = 4326)
 ```
 ##Geocoding
 ###Localizar pontos, através de morada  
@@ -1466,27 +1477,24 @@ _Por completar_
 ```r
 ? procurar!
 
-
+#pelo openrouteservice - tem cycling
 lista1<-list(c(38.74684,-9.150085),
              c(38.74626,-9.143990),
              c(38.75649,9.137337))
-x <- ors_directions(lista1,profile="cycling-regular")
+x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
 res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
+
+#pelo google maps - tem transit
+google_directions(origin, destination, mode = c("driving", "walking",
+  "bicycling", "transit"), departure_time = NULL, arrival_time = NULL,
+  waypoints = NULL, optimise_waypoints = FALSE, alternatives = FALSE,
+  avoid = NULL, units = c("metric", "imperial"),
+  traffic_model = NULL, transit_mode = NULL,
+  transit_routing_preference = NULL, language = NULL, region = NULL,
+  key = get_api_key("directions"), simplify = TRUE,
+  curl_proxy = NULL)
 ```
-
-###Calcular matriz de distâncias
-[rever isto]
-
-```r
-# query for duration and distance in km
-ors_api_key("MY_API_KEY_HERE")
-res <- ors_matrix(coord,profile="cycling-regular", metrics = c("duration", "distance"), units = "km")
-res <- ors_matrix(coordinates, metrics = c("duration", "distance"), units = "km")
-
-#matriz de distâncias lineares, em m
-#coordinates é uma df em Lista com 74 lat e long, projectada em WGS84
-st_distance(coordinates)
-```
+>__Dica__: ver (http://symbolixau.github.io/googleway/reference/google_directions.html)[http://symbolixau.github.io/googleway/reference/google_directions.html]
 
 
 ##Cálculo da geometria
@@ -1634,15 +1642,7 @@ ggmap(mapabase) + geom_sf(data=LisboaLimite,inherit.aes = FALSE, size=1,fill=NA)
 ggplot()+geom_sf(data=LisboaLimite,aes(),color = NA)+
   geom_sf(data=CicloviasAnos,aes(fill =AnoT),color="grey70",size=1,alpha=0.2,show.legend=F) +
   geom_sf(data=filter(Ciclovias,Ano=="2001"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2003"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2005"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2008"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2009"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2010"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2011"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2012"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2013"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
-  geom_sf(data=filter(Ciclovias,Ano=="2014"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
+ ...
   geom_sf(data=filter(Ciclovias,Ano=="2016"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
   geom_sf(data=filter(Ciclovias,Ano=="2017"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
   geom_sf(data=filter(Ciclovias,Ano=="2018"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
@@ -1724,6 +1724,53 @@ ggplot(dest.xy[which(dest.xy$Freq>50),], aes(oX, oY))+
   theme(panel.background = element_rect(fill='black',colour='black'))+quiet+coord_equal(xlim=c(-9.238472,-9.088783), ylim=c(38.690601,38.796908))
 ```
 
+##Calcular matriz de distâncias
+[rever isto]
+
+```r
+# query for duration and distance in km
+ors_api_key("MY_API_KEY_HERE")
+res <- ors_matrix(coord,profile="cycling-regular", metrics = c("duration", "distance"), units = "km")
+res <- ors_matrix(coordinates, metrics = c("duration", "distance"), units = "km")
+#matriz de distâncias lineares, em m
+#coordinates é uma df em Lista com 74 lat e long, projectada em WGS84
+st_distance(coordinates)
+```
+
+##Desire lines pelo stplanar
+
+```r
+#Viagens
+library(stplanr)
+
+od_aml<-ODVIAGENSfrReduxModo
+od_aml$Active = (od_aml$Bike + od_aml$Walk) / od_aml$Total * 100
+
+desire_lines_aml = od2line(od_aml, CENTROIDS)
+saveRDS(desire_lines_aml, "DesireLines_Lisbon.Rds")
+```
+Exemplo das tabelas iniciais  
+
+```r
+str(od_aml)
+Classes ‘grouped_df’, ‘tbl_df’, ‘tbl’ and 'data.frame':	7312 obs. of  8 variables:
+ $ DICOFREor11: Factor w/ 118 levels "110501","110506",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ DICOFREde11: Factor w/ 118 levels "110501","110506",..: 1 2 3 4 5 6 8 9 11 12 ...
+ $ Car        : num  145 33 24 134 1 3 6 2 5 2 ...
+ $ Bike       : num  5 0 0 1 0 0 0 0 0 0 ...
+ $ Walk       : num  86 0 1 26 0 0 0 0 0 0 ...
+ $ Other      : num  12 4 2 19 1 0 1 0 1 0 ...
+ $ Total      : num  248 37 27 180 2 3 7 2 6 2 ...
+ 
+str(CENTROIDS)
+Classes ‘sf’ and 'data.frame':	118 obs. of  4 variables:
+ $ Dicofre : Factor w/ 118 levels "110501","110506",..: 79 114 33 5 112 110 67 80 43 26 ...
+ $ geometry:List of 118
+  ..$ : 'XY' num  -9.2 38.8
+  ..$ : 'XY' num  -8.87 38.53 
+```
+
+
 #Rotinas e funções
 ##Rotina para gravar vários ficheiros em separado
 Neste caso, um por hora de 2016
@@ -1774,6 +1821,7 @@ seq(from = "2001", to="2018", by=1) %>%
 #FIM  
 
 ```r
+# saveRDS(TABELA, "D:/R/Tabela.Rds")
 save.image(".RData")
 ```
 
