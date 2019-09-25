@@ -12,6 +12,7 @@
 
 <meta name="author" content="R Félix" />
 
+<meta name="date" content="2019-09-25" />
 
 <title>Rosix R Notebook</title>
 
@@ -249,7 +250,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Rosix R Notebook</h1>
 <h4 class="author">R Félix</h4>
-<h4 class="date"><em>September 6, 2019</em></h4>
+<h4 class="date"><em>September 25, 2019</em></h4>
 
 </div>
 
@@ -343,7 +344,10 @@ Definir no início da sessão.</p>
 </div>
 <div id="importar-tabelas" class="section level2">
 <h2><span class="header-section-number">1.3</span> Importar tabelas</h2>
-<pre class="r"><code>#ler e importar tabela em txt, separada por tabulação
+<pre class="r"><code>#importar tabela em formato nativo R
+readRDS(TABELA, &quot;D:/R/Tabela.Rds&quot;)
+
+#ler e importar tabela em txt, separada por tabulação
 UtilizadoresLX_CPcorrecto &lt;- read_delim(&quot;UtilizadoresLX_CPcorrecto.txt&quot;, 
                                         &quot;\t&quot;, escape_double = FALSE, trim_ws = TRUE)
 
@@ -634,7 +638,10 @@ MCTRIGGERS &lt;- CTRIGGERS[,c(146:193,196)]/CTRIGGERS$SomaPontos</code></pre>
 </div>
 <div id="gravar-outputs" class="section level2">
 <h2><span class="header-section-number">1.9</span> Gravar outputs</h2>
-<pre class="r"><code>#gravar tabela em txt, separado por tabulação
+<pre class="r"><code>#gravar tabela em ficheiro nativo R
+saveRDS(TABELA, &quot;Tabela.Rds&quot;)
+
+#gravar tabela em txt, separado por tabulação
 write.table(COMP_TrMot, &quot;D:\\rosa\\Dropbox\\MIT\\Inquerito Lisboa\\Respostas\\R\\COMP_TrMot.txt&quot;, sep=&quot;\t&quot;)
 write.table(COMP_TrMot, &quot;D:/rosa/Dropbox/MIT/Inquerito Lisboa/Respostas/R/COMP_TrMot.txt&quot;, sep=&quot;\t&quot;)
 write.table(COMP_TrMot, &quot;COMP_TrMot.txt&quot;, sep=&quot;\t&quot;) #fica no workspace definido do projecto
@@ -1627,6 +1634,16 @@ testcoord&lt;-as.data.frame(st_coordinates(Taxis)) #matrix XY
 Taxis$Longitude&lt;-testcoord$X #escrever por cima dos valores existentes anteriormente
 Taxis$Latitude&lt;-testcoord$Y 
 st_write(Taxis,&quot;D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp&quot;) #gravar novamente</code></pre>
+<div id="conversao-em-wkt" class="section level3">
+<h3><span class="header-section-number">5.5.1</span> Conversão em WKT</h3>
+<p>Well Known Text: ver <a href>wiki</a></p>
+<pre class="r"><code>#colar os campos Lat e Long em wkt, neste caso pontos
+ListaCPteste$geometry&lt;-paste(&quot;POINT(&quot;,ListaCPteste$Longitude,&quot; &quot;,ListaCPteste$Latitude,&quot;)&quot;)
+#transformar o DF em SF, dizendo que o wkt será o seu campo de geometria
+ListaCPteste&lt;-st_as_sf(ListaCPteste,wkt = &quot;geometry&quot;) #converter tabela para shapefile
+st_crs(ListaCPteste) &lt;- 4326 #meter a projecção WGS84
+#exportar em tsv</code></pre>
+</div>
 </div>
 <div id="intersect" class="section level2">
 <h2><span class="header-section-number">5.6</span> Intersect</h2>

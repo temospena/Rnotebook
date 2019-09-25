@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _September 6, 2019_
+date: _September 25, 2019_
 output:
   html_document:
     highlight: textmate
@@ -166,6 +166,9 @@ setwd("D:/GIS/Rosix")
 
 ##Importar tabelas
 ```{r import tables, eval=F}
+#importar tabela em formato nativo R
+readRDS(TABELA, "D:/R/Tabela.Rds")
+
 #ler e importar tabela em txt, separada por tabulação
 UtilizadoresLX_CPcorrecto <- read_delim("UtilizadoresLX_CPcorrecto.txt", 
                                         "\t", escape_double = FALSE, trim_ws = TRUE)
@@ -464,6 +467,9 @@ MCTRIGGERS <- CTRIGGERS[,c(146:193,196)]/CTRIGGERS$SomaPontos
 ```
 ##Gravar outputs
 ```{r gravar txt, eval=F}
+#gravar tabela em ficheiro nativo R
+saveRDS(TABELA, "Tabela.Rds")
+
 #gravar tabela em txt, separado por tabulação
 write.table(COMP_TrMot, "D:\\rosa\\Dropbox\\MIT\\Inquerito Lisboa\\Respostas\\R\\COMP_TrMot.txt", sep="\t")
 write.table(COMP_TrMot, "D:/rosa/Dropbox/MIT/Inquerito Lisboa/Respostas/R/COMP_TrMot.txt", sep="\t")
@@ -1459,6 +1465,18 @@ Taxis$Longitude<-testcoord$X #escrever por cima dos valores existentes anteriorm
 Taxis$Latitude<-testcoord$Y 
 st_write(Taxis,"D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp") #gravar novamente
 ```
+
+###Conversão em WKT
+Well Known Text: ver [wiki]()
+```{r sf wkt, eval=F}
+#colar os campos Lat e Long em wkt, neste caso pontos
+ListaCPteste$geometry<-paste("POINT(",ListaCPteste$Longitude," ",ListaCPteste$Latitude,")")
+#transformar o DF em SF, dizendo que o wkt será o seu campo de geometria
+ListaCPteste<-st_as_sf(ListaCPteste,wkt = "geometry") #converter tabela para shapefile
+st_crs(ListaCPteste) <- 4326 #meter a projecção WGS84
+#exportar em tsv
+```
+
 
 ##Intersect
 Exemplo com as viagens de taxi
