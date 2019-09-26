@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _September 25, 2019_
+date: _September 26, 2019_
 output:
   html_document:
     highlight: textmate
@@ -82,9 +82,12 @@ library(export) #para gravar plots em formato nativo MS office
 library(sf)
 library(ggmap)
 library(maptools)
-library(openrouteservice)
-library(googleway)
 library(stplanr) #package for sustainable transport planning
+library(openrouteservice)
+library(gmapsdistance)#distância e tempos
+library(googleway) #percursos
+library(cyclestreets) #percursos e info detalhada em bici
+
 
 #modelos, econometria, clusters, correlações
 library(mclust)
@@ -1476,13 +1479,12 @@ LisboaLimite <-st_transform(LisboaLimite,  crs = 4326)
 ```
 ##Geocoding
 ###Localizar pontos, através de morada  
-_Por completar_  
+_Por completar_ 
+>__Dica__: ver [CP7](https://github.com/temospena/CP7) no github e juntar aos códigos postais com um `left_join`
 
-### Calcular percursos, por determinado modo de transporte
+### Calcular percursos ou distâncias e tempos, por determinado modo de transporte
 
 ```r
-? procurar!
-
 #pelo openrouteservice - tem cycling
 lista1<-list(c(38.74684,-9.150085),
              c(38.74626,-9.143990),
@@ -1490,17 +1492,24 @@ lista1<-list(c(38.74684,-9.150085),
 x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
 res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
 
-#pelo google maps - tem transit
-google_directions(origin, destination, mode = c("driving", "walking",
-  "bicycling", "transit"), departure_time = NULL, arrival_time = NULL,
-  waypoints = NULL, optimise_waypoints = FALSE, alternatives = FALSE,
-  avoid = NULL, units = c("metric", "imperial"),
-  traffic_model = NULL, transit_mode = NULL,
-  transit_routing_preference = NULL, language = NULL, region = NULL,
-  key = get_api_key("directions"), simplify = TRUE,
-  curl_proxy = NULL)
+#pelo google maps - tem transit, mas não calcula propriamente o percurso
+library(gmapsdistance)
+set.api.key("YOUR_GoogleAPI_KEY")
+ODsGIRAcoord$origin<-paste(ODsGIRAcoord$Latitude,ODsGIRAcoord$Longitude, sep="+") #tem de estar separado por +
+start_time <- Sys.time()
+resulttransitponta <- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
+                                       destination = ODsGIRAcoord$destination,
+                                       combinations = "pairwise",
+                                       mode = "transit",
+                                       dep_date = "2019-10-10", #tempo no futuro
+                                       dep_time = "08:45:00")) #por transportes públicos em hora de ponta
+end_time <- Sys.time()
+end_time - start_time #para ver quanto tempo demorou
+#resulta uma tabela com Tempo[s] e Distância[m]
+#mode= bicycling, walking, driving, transit (mas o bicycling não funciona em portugal)
 ```
->__Dica__: ver (http://symbolixau.github.io/googleway/reference/google_directions.html)[http://symbolixau.github.io/googleway/reference/google_directions.html]
+>__Dica__: ver também o [package googleway](http://symbolixau.github.io/googleway/reference/google_directions.html])  
+> ver ainda o [Cyclestreets package](https://www.cyclestreets.net/api/) para um grande detalhe de percursos de bicicleta   
 
 
 ##Cálculo da geometria
@@ -1667,6 +1676,7 @@ ggplot()+geom_sf(data=LisboaLimite,aes(),color = NA)+
   geom_sf(data=filter(Ciclovias,Ano=="2018"),aes(),color="black",size=1.1,alpha=0.2,show.legend=F) +
   facet_wrap(~AnoT, nrow=3)+ geom_text(data=CicloviasKM,aes(x=-84000,y=-107000,label=Kms), inherit.aes=FALSE) + mapThemeFacets()
 ```
+![Evolucao Ciclovias Lisboa](http://web.tecnico.ulisboa.pt/~rosamfelix/r/README_figs/RedeCiclavel_Evolucao_realceGrey.jpg)
 
 #Matrizes Origem-Destino
 
