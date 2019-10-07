@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _September 26, 2019_
+date: _October 7, 2019_
 output:
   html_document:
     highlight: textmate
@@ -10,6 +10,7 @@ output:
     toc_depth: 4
     toc_float: true
     keep_md: true
+#runtime: shiny
 ---
 ```{css,echo=FALSE}
 button.btn.collapsed:before
@@ -139,6 +140,7 @@ library(export) #para gravar plots em formato nativo MS office
 library(sf)
 library(ggmap)
 library(maptools)
+library(shiny) #ficar mais bonito e interactivo
 library(stplanr) #package for sustainable transport planning
 library(openrouteservice)
 library(gmapsdistance)#distância e tempos
@@ -1428,6 +1430,15 @@ Limite de Lisboa
 LisboaLimite <-read_sf("D:/rosa/Dropbox/Tese/GIS/Lisboa_CAOP2015/Lisboa_Limite_CAOP2015_PNacoes.shp")
 LisboaLimite <-st_transform(LisboaLimite,  crs = 4326)
 ```
+
+###Criar uma shapefile e projectar
+Criar um ponto
+```{r shp ponto, eval=F}
+#criar um ponto com coordenadas conhecidas
+PontoD <- data.frame(longitude = c(-9.121910), latitude = c(38.767135))
+PontoD <- st_as_sf(PontoD,coords = c("longitude", "latitude"), crs=4326)
+```
+
 ##Geocoding
 ###Localizar pontos, através de morada  
 _Por completar_ 
@@ -1729,6 +1740,39 @@ Classes ‘sf’ and 'data.frame':	118 obs. of  4 variables:
   ..$ : 'XY' num  -8.87 38.53 
 ```
 
+## Redes com frequência de segmentos
+Usar o [stplanr](https://docs.ropensci.org/stplanr/reference/overline2.html) para quebrar os segmentos e agregá-los
+```{r stplanr agregate, eval=T, echo=T, fig.height=4, fig.width=5, message=FALSE, warning=FALSE}
+#tendo calculado as rotas de bicicleta de casa dos alunos até à escola D, no QGIS
+library(stplanr)
+sl = RouteD[RouteD$DIST_KM>0.5 & RouteD$DIST_KM<4 ,] #filtrar só aqueles a mais de 500m e menos de 4km
+sl$alunos = 1 #cada route tem 1 aluno a fazer (para depois agregar)
+rnetD = overline2(sl, "alunos") #partir as rotas em segmentos e somá-los
+lwd = rnetD$alunos / mean(rnetD$alunos) #line width
+plot(rnetD, lwd = lwd)
+```
+
+###Plotar em mapa interactivo, com o leaflet
+```{r stplanr leaflet, eval=F}
+library(shiny)
+library(leaflet)
+
+ui = fluidPage(
+  sliderInput(inputId = "alunos", "Alunos", 1, 102, value = 5),  #slide bar definições
+  leafletOutput(outputId = "map")
+)
+server = function(input, output) {
+  output$map = renderLeaflet({
+    leaflet() %>% addProviderTiles("OpenStreetMap.BlackAndWhite") %>% #base do OSM
+      addMarkers(data=PontoD) %>%   #ponto com a escola
+      addPolylines(col="red", data = rnetD[rnetD$alunos > input$alunos, ])})  #linhas da rede
+}
+shinyApp(ui, server)
+```
+![Isto seria um mapa interactivo, mas o shiny não está a correr neste servidor.](http://web.tecnico.ulisboa.pt/~rosamfelix/r/README_figs/Shiny_leaflet_exemplo.JPG)
+
+
+> Explorar melhor como fazer graduação de cores em função do número de alunos em cada segmento, ou da distância em bicicleta
 
 #Rotinas e funções
 ##Rotina para gravar vários ficheiros em separado
