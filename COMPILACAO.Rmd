@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _October 7, 2019_
+date: _December 12, 2019_
 output:
   html_document:
     highlight: textmate
@@ -86,6 +86,17 @@ knitr::opts_chunk$set(
   fig.path = "README_figs/README-"
 )
 ```
+```{r summary tools settings, echo = FALSE, results='hide'}
+library(summarytools)
+st_options(bootstrap.css     = FALSE,       # Already part of the theme so no need for it
+           plain.ascii       = FALSE,       # One of the essential settings
+           style             = "rmarkdown", # Idem.
+           dfSummary.silent  = TRUE,        # Suppresses messages about temporary files
+           footnote          = NA,          # Keeping the results minimalistic
+           subtitle.emphasis = FALSE)       # For the vignette theme, this gives
+                                            # much better results. Your mileage may vary.
+st_css()
+```
 ## Sobre
 Este é um bloco de notas virtuais para mim mesma, que usa o [R](https://www.r-project.org/), o [R Studio](https://www.rstudio.com/) e o [R Markdown](http://rmarkdown.rstudio.com).
 É um trabalho em actualização constante, onde procuro adicionar chunks de código, em linguagem R, para que possa voltar a usar no futuro sem pesquisar muito.
@@ -115,9 +126,9 @@ library(readxl) #excel
 library(lessR) #simplificar código
 
 #manipular tabelas
+library(tidyverse)
 library(reshape2)
 library(dplyr)
-library(tidyverse)
 library(tidyr) #obsoleto
 library(purrr)
 library(tibble)
@@ -159,7 +170,12 @@ library(lmtest) #para LLratio
 library(pscl) #para pseudo-r2
 library(ResourceSelection) #para Hosmer-Lemeshow test
 library(mfx) #para efeitos marginais
-library(stargazer)
+library(ape) #para auto-correlações espaciais
+
+
+#visualização de dados em tabelas limpas
+library(stargazer) #contínuas
+library(summarytools) #contínuas e categóricas
 ```
 
 ##Definição do ambiente de trabalho
@@ -1094,6 +1110,24 @@ plot(ResultyGs_1, type="bar", centered=FALSE)
 
 
 #Modelação
+##Tabelas resumo dos dados
+```{r stargazer tables, echo=T, message=FALSE, warning=FALSE}
+#só para contínuas, estilo latex
+library(stargazer)
+stargazer::stargazer(TODOS[,c(3,15:17)], type = "text", title = "Descriptive statistics", digits=1) #mudar o type para text, latex ou htm
+```
+```{r summary tables, eval=F}
+#tabela com a descrição das variáveis contínuas e categóricas!
+library(summarytools) #para todo o tipo, gera um html
+DescStat<-dfSummary(TODOS[,c(3,4,8,15)])
+view(DescStat) #abrir o botão do view pane para o browser, guardar como html
+```
+```{r summary tables show, echo=FALSE, fig.width=5, message=FALSE, warning=FALSE}
+print(DescStat,style = "grid",plain.ascii = FALSE, valid.col=F, method = "render", tmp.img.dir= "/tmp")
+#está com o erro da largura da coluna 2: ver github deles que explicam
+```
+
+
 ##Matrizes de correlação, em plots bonitos
 ```{r corr matrix, eval=F}
 library(Hmisc)
@@ -1695,6 +1729,7 @@ ggplot(dest.xy[which(dest.xy$Freq>50),], aes(oX, oY))+
   #Set black background, ditch axes and fix aspect ratio
   theme(panel.background = element_rect(fill='black',colour='black'))+quiet+coord_equal(xlim=c(-9.238472,-9.088783), ylim=c(38.690601,38.796908))
 ```
+
 
 ##Calcular matriz de distâncias
 [rever isto]

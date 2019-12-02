@@ -12,6 +12,7 @@
 
 <meta name="author" content="R Félix" />
 
+<meta name="date" content="2019-12-12" />
 
 <title>Rosix R Notebook</title>
 
@@ -249,7 +250,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Rosix R Notebook</h1>
 <h4 class="author">R Félix</h4>
-<h4 class="date"><em>October 7, 2019</em></h4>
+<h4 class="date"><em>December 12, 2019</em></h4>
 
 </div>
 
@@ -293,9 +294,9 @@ library(readxl) #excel
 library(lessR) #simplificar código
 
 #manipular tabelas
+library(tidyverse)
 library(reshape2)
 library(dplyr)
-library(tidyverse)
 library(tidyr) #obsoleto
 library(purrr)
 library(tibble)
@@ -337,7 +338,12 @@ library(lmtest) #para LLratio
 library(pscl) #para pseudo-r2
 library(ResourceSelection) #para Hosmer-Lemeshow test
 library(mfx) #para efeitos marginais
-library(stargazer)</code></pre>
+library(ape) #para auto-correlações espaciais
+
+
+#visualização de dados em tabelas limpas
+library(stargazer) #contínuas
+library(summarytools) #contínuas e categóricas</code></pre>
 </div>
 <div id="definição-do-ambiente-de-trabalho" class="section level2">
 <h2><span class="header-section-number">1.2</span> Definição do ambiente de trabalho</h2>
@@ -1284,8 +1290,102 @@ plot(ResultyGs_1, type=&quot;bar&quot;, centered=FALSE)</code></pre>
 </div>
 <div id="modelação" class="section level1">
 <h1><span class="header-section-number">4</span> Modelação</h1>
+<div id="tabelas-resumo-dos-dados" class="section level2">
+<h2><span class="header-section-number">4.1</span> Tabelas resumo dos dados</h2>
+<pre class="r"><code>#só para contínuas, estilo latex
+library(stargazer)
+stargazer::stargazer(TODOS[,c(3,15:17)], type = &quot;text&quot;, title = &quot;Descriptive statistics&quot;, digits=1) #mudar o type para text, latex ou htm</code></pre>
+<pre><code>## 
+## Descriptive statistics
+## ==================================================================
+## Statistic      N    Mean   St. Dev. Min Pctl(25) Pctl(75)   Max   
+## ------------------------------------------------------------------
+## Age          1,079  39.6     11.0   16     31       46       83   
+## lenght        962  8,539.0 8,446.6  0.0 3,018.3  10,703.2 62,056.5
+## DistCiclov    962  2,355.4 2,009.5  0.0  587.7   3,663.2  9,171.0 
+## PercCiclovia  962   34.5     27.2   0.0   11.1     53.8    100.0  
+## ------------------------------------------------------------------</code></pre>
+<pre class="r"><code>#tabela com a descrição das variáveis contínuas e categóricas!
+library(summarytools) #para todo o tipo, gera um html
+DescStat&lt;-dfSummary(TODOS[,c(3,4,8,15)])
+view(DescStat) #abrir o botão do view pane para o browser, guardar como html</code></pre>
+<div class="container st-container">
+<h3>Data Frame Summary</h3>
+<strong>
+TODOS
+<br/>
+</strong>
+<strong>Dimensions</strong>: 1079 x 4
+  <br/><strong>Duplicates</strong>: 37
+<br/>
+<table class="table table-striped table-bordered st-table st-table-striped st-table-bordered st-multiline ">
+  <thead>
+    <tr>
+      <th align="center" class="no st-protect-top-border"><strong>No</strong></th>
+      <th align="center" class="variable st-protect-top-border"><strong>Variable</strong></th>
+      <th align="center" class="stats.values st-protect-top-border"><strong>Stats / Values</strong></th>
+      <th align="center" class="freqs.pct.valid st-protect-top-border"><strong>Freqs (% of Valid)</strong></th>
+      <th align="center" class="graph st-protect-top-border"><strong>Graph</strong></th>
+      <th align="center" class="missing st-protect-top-border"><strong>Missing</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">1</td>
+      <td align="left">Age
+[integer]</td>
+      <td align="left">Mean (sd) : 39.6 (11)
+min < med < max:
+16 < 39 < 83
+IQR (CV) : 15 (0.3)</td>
+      <td align="left" style="vertical-align:middle">60 distinct values</td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAKhJREFUaN7t1sENgCAMhWFWwA3UDWT/3RQOaggUWkk05n8Hw+lLk9Kic8QSX8gSM3tFBGwNR8DAwL6Jqaa9hanKAxuFpR6Owi4HDAzsI1g248+wzAEDAwN7G0s7bhQWPxsYGBiYDuvYQ/1YaJd3x0r/eWas5oD9FJNvrhKTywMDAwN7HxOfTC0mOjlWXbcWrFoemIyVumDGSuWBdWBnF6Z0us/m4zhiyQ62nh/6jRAyZgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">0
+(0%)</td>
+    </tr>
+    <tr>
+      <td align="center">2</td>
+      <td align="left">Gender
+[factor]</td>
+      <td align="left">1. Male
+2. Female
+3. Other</td>
+      <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">519</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">48.1%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">557</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">51.6%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">3</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">0.3%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFoAAABQBAMAAABrHX9XAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAE5JREFUSMft1MEJACAIQNFWcARrg9x/tzp0TwlC4f/zuyhoa3XrjlTk6GH30Gj0q47dpfhKpz1T7gIbNJtoNPqjjl1xnu8T04pGo4vrii0NwIcKfKw8lwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">0
+(0%)</td>
+    </tr>
+    <tr>
+      <td align="center">3</td>
+      <td align="left">Income
+[ordered, factor]</td>
+      <td align="left">1. Live with difficulties
+2. Live with moderate ease
+3. Live without difficulties</td>
+      <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">79</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">8.0%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">529</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">53.2%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">386</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">38.8%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFwAAABQBAMAAABmAw8QAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAFdJREFUSMdjYBjaQAkMFAUJAahyZWMQGFU+qnxUOd2Vk5hXCaobxMqViAQoAUkQGI0qH1U+qnxglZOYtQdVsUTNUkwRQznegBxVPqp8VDntlJOYV4cqAACzn4rEzoWdkQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">85
+(7.88%)</td>
+    </tr>
+    <tr>
+      <td align="center">4</td>
+      <td align="left">lenght
+[numeric]</td>
+      <td align="left">Mean (sd) : 8539 (8446.6)
+min < med < max:
+0 < 5922.2 < 62056.5
+IQR (CV) : 7684.9 (1)</td>
+      <td align="left" style="vertical-align:middle">944 distinct values</td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAI5JREFUaN7t2cENgCAMhWFW0A2EDWT/3VTkYCAKLajR/O9AwuVLD6WBYAzRxIYMjYmY82tmMDAwMDAwMLA7sXB7mTph2+LBwMDAwMDAwMDAwMDAHsYannY55vTlgYH9BdP99pxg+x7sZUw6Jy8x6RgvY4LyypjgRHweqzurldihVXphSfONKR4x2yWGaLIAqwGC8JpY/y0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDB5eBwKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE5LTEyLTAyVDE4OjA5OjAwKzAwOjAwCCWktgAAAABJRU5ErkJggg=="></td>
+      <td align="center">117
+(10.84%)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
 <div id="matrizes-de-correlação-em-plots-bonitos" class="section level2">
-<h2><span class="header-section-number">4.1</span> Matrizes de correlação, em plots bonitos</h2>
+<h2><span class="header-section-number">4.2</span> Matrizes de correlação, em plots bonitos</h2>
 <pre class="r"><code>library(Hmisc)
 library(corrplot)
 library(ggcorrplot)
@@ -1323,9 +1423,9 @@ heatmap(x = res, col = col, symm = TRUE)</code></pre>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAMAAABNUi8GAAAAwFBMVEUAAAAAADoAAGYAAP8AOjoAOpAAZmYAZrYaGv81Nf86AAA6ADo6AGY6Ojo6OmY6OpA6kJA6kLY6kNtQUP9mAABmADpmAGZmOgBmZmZmZrZmkJBmtttmtv9ra/+Ghv+QOgCQOjqQZgCQkDqQkGaQkNuQtpCQ29uQ2/+hof+2ZgC2Zjq2kDq225C2/7a2/9u2//+7u//W1v/bkDrbtmbb25Db/9vb///x8f//AAD/tmb/trb/u7v/25D//7b//9v////NZYw3AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAf20lEQVR4nO2dC5/bNnbF6dnOKjt240RrO6k7rdxN01lts3GrJk6Vzojf/1uVePABXEggwAcuiHN+uxmPBJIg8R+8eHBR1RDEWFXqDEDQLQFQiLXKA7RipdRPg73Ke0Ks7phVZliqvCfE6o5ZZYalyntCrO6YVWZYqrwnxOqOWWWGpcp7QqzumFVmWKq8J8TqjlllhqXKe0Ks7phVZliqvCfE6o5ZZYalyntCrO6YVWZYqrwnxOqOWWWGpcp7QqzumFVmWKq8J8TqjlllhqXKe0Ks7phVZliqvCfE6o5ZZYalyntCrO6YVWZYqrwnxOqOWWWGpcp7QqzumFVmWKq8J8TqjlllhqXKe0Ks7phVZliqvCfE6o5ZZYalNveE8lrItrnHP7s294Sm3xAA5aTNPSEAui1t7gkB0G1pc08IgG5Lm3tCAHRb2twT4gLoDLMJaSYWmGlzt84G0FnOssTJ8tLmbh2Abkubu/XAG1qsiQWg82hztx4K6BInjTxkpZPlpc3dOgDdljZ36wB0W9rcrScCdIZ+LCagXNrcDaYCdHqKqKLYXPnZ2twNTqrsJpx0egoA6tLmbnAKKQCUnzZ3gwB0W9rcDa4LaMCgBYBGaXM3uDKgM5x8dILZDspJm7vB/ACdNHW0ufKztbkbzBDQ8SkLnBrd1t3U2wQ0jMFtFelm7maOSU37G/85VwJ0/FV8X2anzdxNQEM5+hyzogNAo7SZuwGgo77MTpu5GwA66svstJm7mWOoAUD5aTN3M0cxA1B+2szdlA3odidFs7+BVlwBnWOqasLfRfblm/0NtGILaJoPvF/kouxvoBUAdSr78s3+BloBUKeyL9/sb6AVAHUq+/LN/gZaAVCnsi/f7G+gFQB1Kvvyzf4GWgFQp7Iv3+xvoBUAdSr78s3+BloBUKeyL9/sb6AVADV+38wrz2wzbguAhh2Ri7LNuC0AGnZELso247YAaNgRuSjbjNsCoGFH5KJsM24LgIYdkYuyzbgtABp2RC7KNuO2AGjYEbko24zbAqBhR+SibDNuC4CGHZGLss24LQAadkQuyjbjtgBo2BG5KNuM2wKgYUfkomwzbguAhh2Ri7LNuC0AGnZELso247YAaNgRuSjbjNsCoGFH5KJsM24LgIYdkYuyzbgtABp2RC7KNuO2AGjYEbko24zbAqBhR+SibDNuC4CGHZGLss24LQAadkQuyjbjtgBo2BG5KNuM2wKgYUfkomwzbguAhh2Ri7LNuC0AGnZELso247YAaNgRuSjbjNsCoGFH5KJsMw6VIQAKsVbugP6vrf+y9a+2/mrrX2z9ySv/Of48XSTn5CL+q5IUqQssVAAUgLIWAAWgrAVAAShrAVAAyloAtFBAn998TlluowVAAShrAVAAyloAtHBAz1VV7eR/q+rxuGs+Oe1SFaZL3AClG/zcEgCdCujLu8f6/OpJ/LOhU3x4OTwmKnun2AEamB6ATgNU6OW9APR4/6UWcDJr+wFo4YA+P1SVqEFPDZ+yeT/tZyzO6QKgZQP6/PpJ1qDnO9Xif/j509OMxTldALRsQAWYx1dPuhvaNPQf336ZrTDnEAAtFdAHMcrcXw5V9e3hnw/iFwHpuWI1RAKgxQJ6RcyGSAAUgJriNQlaJwT0+tRmkAiPfmIJXH4QSLmTc5CrfGXLiw75KyApSEb9kIcB+vxwx6wCTQho0MdXBUDnBJShACgAZS0ACkBZC4ACUNYCoOUCqmbn2U0smQKgxQJ6OXwv5pQAaNCFAehqgD6/+UmwCUCDLgxAVwP0tKuPewXo84N4z/n85i9VtRce0YrPdCg7QAMNywA0FlDpYbr/IgCVruW7z88Pe/FDmEKV+Y6DuAEaKgAaC6iAU5DZACoq0YZXYb3rf5unfCYLgBYK6EUamCq5zOOszPSysW8AfdDOJhYCoIUCqsZGTaU5qEE1oKxGTQC0UECPyrZ03A/6oApQXguTAGiZgLadzPPdT4NRvARUjOLZtPAAtFBAsxEABaCslTugpMz8xP5my08bSeFHeAYRxgnCRH/wap7Hvp4AKABlLQAKQFkLgAJQ1gKgAJS1AGihgKrADU7XEp9Z+hqAlguopPBou5ZYwSkEQIsGlPAIQGe+MACdDOjwPeffxVtOaRgxvMvndPYmjoCGGJYB6LQmflebTpHOcjf0Lrfe5hRiCWjAaQBoLKAqup0i1fTaiR+Gd1kwnEoAtFRAZeP+qJz1A7eyVZEq73LT0qcKywhACwZUrox316DEu3xOtI4OgJYMqJhm0n1Q8eN0N2zbe++y+BCAjvqKCIBOAvTl3U6P4utTVX3zoUGyeuwBbb3LGMWP/YoIgEYCmovWADQ0Ui0ABaCdVgF0xIexUZYJOkSER0IsgdyvCNxmQJr8WRBA/UxPKMckYgOoL/0VAVAAusw1ACgAHSMACkBZC4ACUNYCoMUCKt5j7q4b7K748dYWAC0VUPFq6HLYAVAAyhJQ5VBSwcOcTxaAXv0VgK4AaPduvfcst280lUvZdjRfDh8fql3z792qMZhZAhpgWAagsYC2BuQ+up32JWuXsjKMVnftt5eDMJY0n79+WjMGM0dAQwRAZwDU9CUP/HfDbwWV+v9rxmAGoKUCOmjitWdZ+5K1S7kDVH87BHTFGMwAtFBAVXXZ/NeMSq9XJ9WDQZK7Bl1L6QENN4gMBUAjAa1PcuDT9Cn7CMvKl9y6lFtAuz5oB+iaMZgZADopHwA0FlAxZm8n6skoXi8FMUfxHaBrxmAGoMUCmocAKABlrdwBJWVGWCLEkhQRxBKjup8umxSSc+LjJ1clhxAe/dmIfM7JBEABKGsBUADKWgAUgLIWAAWgrAVACwVUeUHM2czk3jqHAGipgEoYzx2hTjgZEAtAiwZUvBYa/m4JgNYANDmg8pXniw6t3LmVRYRlDrvKsgE0SgB0ahOv/civ2vCLnVt5PzA2pRQXQGMFQOcYJJnxQcVvfRTGxAKgpQLasSdQ7WrQgVsZgM6RAwA6FVBRWZo1qP4WgM6RAwA6FVCx9uP4qm3UB25lHVo5sQBo6YBeDlX1rXDJV499TOVuyJRq74RO6QCNiQZKBUAjAc1FyQCdKQcAFIAufI1pObCLPabc/cSSc/j/Lrx0+Y/w0xZxyKSnnUAAFICyFgAFoKwFQAEoawFQAMpaALRYQMVbzT6Iog5m9+rH9C+PDAHQUgE9izn489BOx+DFJhUALRRQbVUehvkEoCO+DfWDAtBIQFtXiIgBLszJ7UfyBWeSWMpusQM08NwANBJQHcBWxF9U5uQhoEliKbsFQAHo66eOzbp1NCWIpewWAC0UUN3E905QN6ArxlJ2C4AWCmg/SLoJaPJxEwAtFNB+mukWoGvGUnYLgJYKqNwyoR0bXQN0zVjKbgHQYgHNQwAUgLIWA0DtufcgEUBJifgd9USER0Ks/ypEXsbJETP8FdBD4osxjdIDGp9WCIAC0FWvAUABqCEACkBZC4ACUNYCoIUC2u22XR+r+38bWJfTvzwyBEBLBbTlUOzDfdMOUvqbpPi0QgB0KqDeGGEA1Eg71bAMQMMA1U39R7VpbKVevTMKs8wN0FAB0FhAFZg7XYPqbbfVvziFWQagpQJqNvHN/7SFmVmYZQAKQDWgpx5QRmGWASgAddagNZMwywAUgA77oGKRJ6swywC0VEDVIEmGVW5hHI7iuYRZBqCFApqLACgAZa3cAfWDQcqMwEXiefsPIcT6/wy8CfzEkj8cIv/jWLAsFhEABaCsBUABKGsBUADKWgAUgLIWAC0UUDUP6gytyMqyDEBLBVRSeLRDK3ZhRrgIgBYNKGERgN5IFi4AOgOgOojyWRiY5DtO+8PuRwpxAjTm3AB0WhO/q7U7WaxLOnexGM0P9Y+Y8pksAFoqoHKQtNeV6Psn4WWqDYtd/6H+kUQAtFRApX3pUZPaNOAiGuNjB6jxYfsjhQBowYB28Wu19AIk06R8VlNR50SbfQDQkgEV00ytO/n1kwRUrUOiHwJQAJoA0Jd3uzaIshqpC3dyb1nGKD4imSkAGgloLgKgAJS1eAAaFVxZipQqKTMCl19euKj8xC4BqD9fAHSWa1TjkjkEQAHoCtcAoAD0igAoAGUtAApAWQuAFgqo6akbsaNxok2PASgAreMAXcc2CkABaA1AR6WIMiwD0HhAVQRl+SLzj++ftEf58ukHEdbWCLJsJVk18jIjQKMEQCcAqiIoC7fn6dWT9ihfDuKTvRlk2UyyauRlAFowoMq5JLzyIp6y8igLCOvTzgyybCZZNfIyAC0YUOX9PGn6lEdZAnq+/8UIsmwmWTWwLQAtHtBB9dhoUIPW3QoQMwkADRAAnQzooIMprcr3X5pPzCDLZpJVIy8D0OIBFauSvlFDdOlY/l6O240gy2aSVSMvA9BCAb0m2cQzEgAFoIYAqPlVN+MeKQLXV7YWAdSfghD7myVyxH/b8l+EHAJAZ75GNTUXAHRmQLkJgAJQ1gKgAJS1ACgAZS0AWiigKngY9SP174ecb4pWjx0KQEsFVJJ2Ngj10JcksC0ALRpQc1IJgF77iqQYbVgGoJMBPVfCofz89Xe9VandVbZ1L8skOvryT02C5jAdgnlxcQV07LkB6LQmXpmRm5ZexAodWEPUq3rtXm6TyK9/Fo6Rt78q73IABZECoKUCOhwk9S7k1lxX120Uxvq0a5Noc+iuPu21d3lsMcULgJYKaD9afxi4kFt7ct0DKiLXD5M01een1rs8tpjiBUBLB1RUnX316KxBrSR/+/Htl9UGTAC0dEBF6OSjrh5VMy/7oK+fevdym0T3As7Vvtbe5bHFFC8AWjqgl0NVfXuQYZUvOrxyP4pX7mWdpP365cPn1tC8vABooYCOEgPvHQAFoNcFQFtAHVPw4xSBH3Gu/8mW36bvB8Hm8TcbWL+BngBKskFEiCUpgkoOgF77CoCyAJSBACgAZS0ACkBZC4ACUNYCoIUCenWWPVEk5WsCoADUFAAd8xUABaBKXAGNNiwD0DBAtfFYuZatSMpff5doi+OBmAI6WgB0GqA6aLK2JNuRlJNP0wPQ0gEdGI+bHzSScnIB0MIB1cZjZUmmkZSTC4AWDqj+oSzJNJJycgHQsgHVxmNtSaaRlJMLgJYKqFw0t+/iKktLMo2knFwAtFBAc9HmACXlHkEsIcOfgojgZp/CBtYfk3kEsQB05msAUAB6WwAUgLIWAAWgrAVAAShrrQLoTbvHNAHQaEDFRJPDDFKgm2nJywPQWEDPYp+4QQDbzt4EQOe8PACNBFSvKO5DKALQRS4PQCMB7V/Cq5hgf5cvj7QftGn9RdWqfkhb6HmdWHZUrAAdaVO+aVgGoOMA1SHsXt49DnbX1u/ipTtUh7a9+yxsoaJaPa8Rr5aIF6DhJwCgcwJq+UF7W6hgNY0AaKGA6ia+D/spfmg/qOC06aPqHzLly7tqjc23qQBooYD2gyRvDapHT+ckC5QAaKGA9tNMsuPZdDV1S077oDq0LQAFoGsCKlttydypqr758FmEp239oOYo/o1a9YlRPABdFdA8BEABKGvxADT+zTyhjdjj/YCSQgynjYqg4sWPEOvnEYCudPlrkcD9AqAAdIXLA1AAekUAFICyFgAFoKwFQIsF1GFYNlfCF7Mu3n95ALo+oNcMyy4lRBWAFgroVcOySwDU+BEiABoJaG9Yvnz6oap2MtqN3J7z40O1a5r/nd44thLv5hO956y5ATqDYRmAjgO094NeDsIXstemJrXB8f0XZbXXRmXUoNEnAKAzAKo2hW8Bfaz1//XO3DWaeAC6PqC9YVkCer7/xQWoNioD0OgTANBIQPtB0q0aVCTRltBEAqCFAtpPM6le56PwJBNAtVE5YbR6AFoqoJ1h+XL4XkSyFYZlWoMqo7I0M6cRAC0W0FYMNoW/IQAKQAGo9/LxuSCFSEj5yhYBlJyDpCAn9dJG3e9e6EkKQmwEjyQFfYQA1H95AJoQUN4CoACUtQAoAGUtAApAWQuAlgno5bCTP4+7wcNk4VC2BEDLBFQHsrkWtY4PqgC0UEAVmtfiLQFQ8/IAdHVAVeN+3MuwS8Kd/PV3dz8p+5Kwh1avnmSC0+7qo19HzAANNiwD0FhAReX58l5FtDu/ehJxlPWr+D4kY51+Ej81oFbMm+DsANBYQAV7bVRvHUe5DQSuYoLqTbmnF/IkJQZUC4CuD6hovUULL5cfv+riLItdutVvIsFpP0v5ThAALRbQ5zeizylj05qBwGs9SHr58POn5FvSANBiAb0c/lGMgERf9NjVoLpdVw7l48e3KTb2MARAiwVUeerry6Gqvj20e33Uaomxciifk9mUewHQcgH1Kv0QCYAC0BtKPglacwM0PMYyQYcUM7HYk0OI/AgTEIgIf3aCiHMSYv2AEo1/tM8PSbb1sARAAShrAVAAyloAFICyFgAFoKwFQIsFVLzVvDpM5zDDJAVASwVUvEFqffWm2MApBEALBVQZlp1BlwAoEQBdHdDOSy+cyp+lTVl7l3Ws5Z+U405/k0zcAA01LAPQWEDb4PTCqaxtyq13Wb6W/1nYRt7+qr5ZH4lWzAANPhKATgZUOZWlu76uB847aQcdfJNGALRUQLsmXuCobMqWd/ntr5+e2m+SCYAWCqgaJInAtdpnV9ve5fpvP75NuX2CEgAtFND6pIMrD5Yftd5l3eifZVjbxAuTAGipgOrlxnp1R2tTFt5lHWu5fvnQfZNOALRYQPMQAAWgrLU5QAlcBFAi4rkn7PhhIjxGsGOLnIKIEPubV/MW3PICoACUtZgAakcYGS0ACkBXFAAFoJYAKABlLQBaKqBi0vO6YZmNAGipgIrwn27Dcs3JEgpACwVUWZSugQhA3QKgqwHaVZ6XTz+oV54P0s/05i9VtVfvN3XoZflJXWvncpvsc93vNbukeAI6wbAMQEc28WKzY8Ho5SAM9XtpVr77/PywbzeI70Ivy0+Gnmb1ffN/UQ2fl7UzMwV09BEAdMIovmF0V8so36ddG1q5D7QsU7hCL/eOvGubhMwoAFowoNIBKgE93/9PUxFeuiiMElBX6OWzkUxWw8syCkALBVQ56i/CXGfUoD2gV0MvDzzN9fWdbGYSAC0UUOFVrkWvUvyjaarNzqWA0xl6WScTP053XbIFBUALBbSuj02bLRvs7+Uo3RieC8+yM/SyTlafquqbDwWP4kcfAUAn9UFr2crPU3jLCIACUAA6WuGAEh6J/mCL8Og/B/kzIDz65cctHGmCHyH2/2yRJwhAAwRA1weUuQAoAGUtAApAWYsZoMFLPwAoAE0gALoGoOduCjNpeLDbAqDFAno5fN/ald2AsjCFAtBiAdW7HQsB0EANcuXxgwLQaEDb/eLPVfXH9z8O4ykPXMvtu3kRhnltr7KNAiNVzn+6BEBjAW3NxtL38eo/hvGUB67lzmz3WK/uVZYCoKUC2sIpf75/GsZTHniUB+6m1b3KUgC0UEDlqmOx6OOkAB3GUx6aQvt/ru5VlgKghQKqRkBNzahr0GE8ZTegq3uVpQBooYAe1RTTca/6oE/DeMqDdr11JreL6Nb0KksB0DIBbSeW5ELO6pvmt0E85YFrWTuT2zVKq3qVpQBomYBmIwAKQFmLKaDGZPwtEXSICKDEUe8HlDjqIwD142bLTywBlPBIiF2nAOcTT0AHAqAAlLUAKABlLQAKQFkLgAJQ1gKgywAq32oq61I7267Wd6ovujnO1Is+AWipgEouj0M/Usfi0AgKQD0CoEsCaniSAWiMQgPYAtBAQHvzsWDxLMM0ye9UgOX2Q21lFsbldct/1avNLwA6rYnfDczHDYtqHZ3eAFkGWNYfXlor89r1KQAtFVA5FlLVpTYfXw4fX8uhUdfEN+TqDwdW5nUFQEsFVDiWRH3Ym48vh/v/3LXftQGW9YcDK/O6AqAFAypXxvfmY7Fort+cRgdY1h8OrMzrCoCWDKiYZurjKcvxkJh3UvCqAMv6w4GVeV0B0KIBfXm3M0fxcvsk+Z0OsNx+2FuZ1xUALRTQXARAAShr5Q4otHEBUIi1ACjEWgAUYi0ACrEWAIVYC4BCrAVAIdYCoCsrzX4FjHdJ8GgjgL6821mfXA7V/S/DN8fnu88nI9yVnWLg5Bmdwj6p/xz10bL8ek8Rc2/kA/uq2WgjgNZ2sLXLYX++/3Lq14TJAOyP5+EHRgq9mFHuUB2Qwjip/xwyfpxeTjn2FFH3Zn1gXzUfbQbQWvlv2oqiqYfO91+G9VDzwd1n6wM7hXm+cSnsk3rOYct/ish7u0vgjVtAmwFUVD2P/TpaVcscjUrlZFU7VgqiMSmsk4afw3+KqHvznzQTbQTQl3e6MLpaQ8ZgN9vJV+aSGkcKqxn0pyAn9Z/D7kDSU9id0oh7c92s2W3NRRsBdA75962YIwXpQNIEVv9xDnmvylYAtJN/KmamFEYH0t+vnUPerjBbbQRQNRVjTAA52lprbsZOcbKnc0aksKdzSApbpANpTwCR/iOdurJFxujkA393mqs2A6gZB4u2tY75HiuFo5h9KfzTOV0HcpARowNJJ4DM/qNj3omeU4pMdQ4/IN3WXLQVQN8/narHaXNGrpP6U3ibY0HY3nOe0Gw4z0mykWOLTrQdQJtS+4c311tj2sh5W+Mx7fW46ZzTAjPk5Jxk16I1tjFaXBsCtL4cbvTC6lGzSp5eqiOFdzpnWNvpXFndhEG+mvtw5vzGOfvTPt744N/lfz/kR+xGAI1QRC/VP1njOIedWlbLx31/hPx92jm9enkntpGrvG0GPxUMaNybzduTNaNS1MPu4Ygx+hxTRKKeznGMtBlATxFvgby9VH8Ku/U1U7gabLvGpDWonVH/OenNOgbtxwyrz3ozgKrJnr7hrEm5++eMartU/Slom++fzpEpdtbvxlXt6SLvOcnNmh+4er7ZaCuANvXKB+oJCppVirvs7C9oIjJ65WYxzcRHl8Pj5dMweiVtOf2zSjGX9b2giUDFm1FyTk8NmrU2AqiIZnk2pl4C22vStfN/QM9BmlKX/djuLd/uLNOrus7p74OSPnou2gqg4VqmlrEmkRwzAVZv2d9ZJorpBNh99Gy0KUCDWtJF+mmjJo2M3rK/sxzdKb1x1Xy0SUBJWztmvsdCxYmFeGnUvWJ0vxYiXV+SwuwtO6aZ7D4ocYG45tRur8wjffRstElAx8nsp9ldOxegalOrm6/e7Ukk2rbavWVvZ9nlsrLn1Dwr8xx99Fy0aUDPQaMCE0kXoBG9giXaVtecWqZ2ZL82DOjRNFQEwuWc3T7e7BW4tETb6phTy9WO7NcWAL3mERq2cHYD7sLP6No5+6C3ewVC5IWqa/6r6y+O6izTLmfgnFq+YUXqbQBK1aBz/8U0l9FSsrdJNbt2o0rVNYnkOYT0F+2JKXqR2CmidqQEQLlJlYjP/UgANbp2caUau2guZGJqtKbdChNtEtBaNKN2Dep4C/RoHXSzu+hsff2L5qg3xOwvema7nPnyO6vbzKkzwizCUEdncZjryKzmmHTt3OU+kH/RnObvhnvJJNjVr6UTUyPX/6GJZy3XvJ9ZD3n6i2a5X5l38iyaC5+Zsma7/smZImj9HwDlqueHSa0emRglJT1i0dzJrkFVzsYS22SUmJtC1/8B0BxE1pFZEi2tXcxmuZ8cTHsXzV35S7g1SLJ6rU2j7+zX3nz5BD/o5tRUck3NZHx0pdxvaWwMpJYdZ0RRR681yMvqivWAVZ35yajsJHs3I3aNnRgd9dLxdmymmtR+J+P9fnjICazq5K/b64lGAeqa7A9dNKd0C2F3r3UYhcFvbyLCqk7ucs03Dio7F6DHyugMOvqgoYvmHD3Sa+Yl+23njpzlhr3JNUGGVZ285Zj/tio7C1C9d8FxUMoRC+VH6uYeB962mdqbzAkyTNRnIGoM9qwnaiukW1M4I2xEhsf5eqrrjDtG8TQb1rumrCeWTBUDaB0YgLArY6MTIKglU0JktZoxAvd6nIUGPUyzY+GYB5W4n4fvV+k7sCWWsKZROYAGahygtsgckXdG0pqftTsW9E2Sro6fH24aoLymgVxUGqC/jy4zu4m/AejvVts6TGF7nD3ydiy6P5ygKPaLBL5fRYUAKqqUR/Pdp6/MSF1GAHWclM4RhfUsSL09KsW4AGR5bpxUBqCi5W36aUdruttTZlZv0AbUedLgAbPjIkJX89W97rq1A15N52dz3TipDEAVXCY0oWVGAHWdNDhj9lyWf+5Adz5PZHvPgej8LDEN5KKCALVZDCwz1/ohz/j8+pukVoRHx+wrPch8geC+8FaWeZYE6Myrwp0nDdvRzdWi+/Gjuh1SNGsB0FlPGrijm7/LOe40t0OK+ityxioEUNfYZerWQa6TXjG7X+VvzOuqETnZzosjojIAdWmR6HZW2+rc/X2oMV3OERrL9++oQfPRMq5zYnb3VW4xXU5bvgbcNWGbi8oFdJ0oxGlaX3OjGteEbTYqF9B6ne0rbxrplpOxfdgME7bJVDCgs8s5alpl+Oz+WzuNnrBlLAA6r7yRlpaQo7dCatC5J9nWUqGALmUyT7Pel4YRN/qgABRq5Q8Bvs5VDWHJB9TJHwJ8sateX72Ss4oF1LFwYgkl2l4jSVd4EZUK6JiFE3MozfYaCH2Tu+IWToyQPwT4EqJL9dZ4CbGKSgd07o28vCHAl9CVIKQ5vjgiKhRQunBiHiV6s7mdFp2oUEBdCydmkekrcsV0XELOcE5hu0RxVamAzmMjIrLebDpiOi4h18TSMct95ajKBXQF+UPmLSRrl6icBUAXVCJAHbtE5SsAuqBWAlRMJ5367sq4XaJyEQCdT+6FyYsDKiYiRPCxbpDk2CUqXwHQBbXKW/HLpyc1gjciQqEPCjGRqKblVIE5D5rn7vBU/w8IJau/fhRMQAAAAABJRU5ErkJggg==" /><!-- --></p>
 </div>
 <div id="modelo-regressão-linear" class="section level2">
-<h2><span class="header-section-number">4.2</span> Modelo regressão linear</h2>
+<h2><span class="header-section-number">4.3</span> Modelo regressão linear</h2>
 <div id="preparação-das-tabelas-para-regressão-linear" class="section level3">
-<h3><span class="header-section-number">4.2.1</span> Preparação das tabelas para Regressão Linear</h3>
+<h3><span class="header-section-number">4.3.1</span> Preparação das tabelas para Regressão Linear</h3>
 <p>Se houver variáveis categóricas, ele vai fixar uma delas (a primeira dos factores) e responder sobre a outra, ou outras classes</p>
 <pre class="r"><code>#ordenar variáveis categóricas para referência
 MODELSD$Gender&lt;-as.numeric(MODELSD$Gender)
@@ -1334,7 +1434,7 @@ levels(MODELSD$Gender)&lt;-c(&quot;Other&quot;, &quot;Female&quot;,&quot;Male&qu
 MODELSD$Gender&lt;-factor(MODELSD$Gender, levels=rev(levels(MODELSD$Gender))) #para tornar como referência o male</code></pre>
 </div>
 <div id="modelo-lm" class="section level3">
-<h3><span class="header-section-number">4.2.2</span> Modelo LM</h3>
+<h3><span class="header-section-number">4.3.2</span> Modelo LM</h3>
 <pre class="r"><code>Model00&lt;-lm(formula = CANDNC.DISTb$TYPE ~ CANDNC.DISTb$Age)
 summary(Model00)
 
@@ -1363,9 +1463,9 @@ AIC (LRmodelGST) </code></pre>
 </div>
 </div>
 <div id="modelo-de-escolha-discreta---dcm" class="section level2">
-<h2><span class="header-section-number">4.3</span> Modelo de escolha discreta - DCM</h2>
+<h2><span class="header-section-number">4.4</span> Modelo de escolha discreta - DCM</h2>
 <div id="preparação-das-tabelas-de-escolha-discreta-dcm" class="section level3">
-<h3><span class="header-section-number">4.3.1</span> Preparação das tabelas de escolha discreta DCM</h3>
+<h3><span class="header-section-number">4.4.1</span> Preparação das tabelas de escolha discreta DCM</h3>
 <pre class="r"><code>#meter a var dependente como categórica
 DATAMZ$CHOICE&lt;-factor(DATAMZ$CHOICE)
 levels(DATAMZ$CHOICE)&lt;-c(&quot;Car&quot;, &quot;PTransit&quot;,&quot;Walk&quot;)
@@ -1384,7 +1484,7 @@ mldata &lt;- mlogit.data(DATAMZ, choice=&quot;CHOICE&quot;, shape=&quot;wide&quo
 </blockquote>
 </div>
 <div id="modelo-dcm" class="section level3">
-<h3><span class="header-section-number">4.3.2</span> Modelo DCM</h3>
+<h3><span class="header-section-number">4.4.2</span> Modelo DCM</h3>
 <pre class="r"><code>#ir numerando para não nos perdermos. O zero é o com todas as variáveis incluídas
 #O Carro é a variável de referência. o município 1 também
 LRmodel_0&lt;-mlogit(CHOICE ~ 1 | Municipality+Level+Rel+Age+Gen+Wrk+Stud+Inc+Car+Child+DISTANCE_W, data= mldata)#Com todas as variáveis
@@ -1395,13 +1495,13 @@ summary(LRmodel_1) #mau R2</code></pre>
 </div>
 </div>
 <div id="modelos-logit-ordenados" class="section level2">
-<h2><span class="header-section-number">4.4</span> Modelos logit ordenados</h2>
+<h2><span class="header-section-number">4.5</span> Modelos logit ordenados</h2>
 <p><em>Por completar</em></p>
 </div>
 <div id="modelos-logit-binários" class="section level2">
-<h2><span class="header-section-number">4.5</span> Modelos logit binários</h2>
+<h2><span class="header-section-number">4.6</span> Modelos logit binários</h2>
 <div id="preparação-das-tabelas-para-logits" class="section level3">
-<h3><span class="header-section-number">4.5.1</span> Preparação das tabelas para logits</h3>
+<h3><span class="header-section-number">4.6.1</span> Preparação das tabelas para logits</h3>
 <pre class="r"><code>#meter a var dependente como numérica - não pode ser categórica! e só pode ser 0 ou 1
 DATA$CHOICE&lt;-as.numeric(DATA$CHOICE)
 
@@ -1418,7 +1518,7 @@ MODELSD$Gender&lt;-factor(MODELSD$Gender, levels=rev(levels(MODELSD$Gender))) #p
 DATA[is.na(DATA)]&lt;-0</code></pre>
 </div>
 <div id="modelos-logit-binários-1" class="section level3">
-<h3><span class="header-section-number">4.5.2</span> Modelos logit binários</h3>
+<h3><span class="header-section-number">4.6.2</span> Modelos logit binários</h3>
 <p>Ver <span class="citation">@Field2019</span><br />
 Ver também mais <a href="https://stats.idre.ucla.edu/r/dae/logit-regression/">aqui</a></p>
 <pre class="r"><code>library(MASS)
@@ -1446,7 +1546,7 @@ logit05_2simples &lt;- glm(formula = CHANGE ~ BikeOwn + BikeEOwn + LearnRide + B
 summary(logit05_2simples)</code></pre>
 </div>
 <div id="odds-ratio" class="section level3">
-<h3><span class="header-section-number">4.5.3</span> Odds-Ratio</h3>
+<h3><span class="header-section-number">4.6.3</span> Odds-Ratio</h3>
 <pre class="r"><code>#Odds-ratio
 exp(coef(logit05_2simples))
 
@@ -1454,7 +1554,7 @@ exp(coef(logit05_2simples))
 exp(cbind(OR = coef(logit05_2simples),&quot;1/OR&quot; =-coef(logit05_2simples), confint(logit05_2simples)))</code></pre>
 </div>
 <div id="efeitos-marginais" class="section level3">
-<h3><span class="header-section-number">4.5.4</span> Efeitos marginais</h3>
+<h3><span class="header-section-number">4.6.4</span> Efeitos marginais</h3>
 <pre class="r"><code>##Marginal effects
 library(mfx)
 logitmfx(formula = CHANGE ~  BikeEOwn + DistanceCloser + BikeRoom  + 
@@ -1463,23 +1563,23 @@ logitmfx(formula = CHANGE ~  BikeEOwn + DistanceCloser + BikeRoom  +
 </div>
 </div>
 <div id="modelos-hazard-based---sobrevivência" class="section level2">
-<h2><span class="header-section-number">4.6</span> Modelos Hazard Based - Sobrevivência</h2>
+<h2><span class="header-section-number">4.7</span> Modelos Hazard Based - Sobrevivência</h2>
 <p>Ver tutorial <a href="https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html">aqui</a> e <a href="http://www.sthda.com/english/wiki/survival-analysis-basics">aqui</a>.<br />
 <em>por completar</em></p>
 </div>
 <div id="testes-de-goodness-of-fit" class="section level2">
-<h2><span class="header-section-number">4.7</span> Testes de goodness of fit</h2>
+<h2><span class="header-section-number">4.8</span> Testes de goodness of fit</h2>
 <div id="aic" class="section level3">
-<h3><span class="header-section-number">4.7.1</span> AIC</h3>
+<h3><span class="header-section-number">4.8.1</span> AIC</h3>
 <pre class="r"><code>AIC(LRmodelGST) </code></pre>
 </div>
 <div id="anova" class="section level3">
-<h3><span class="header-section-number">4.7.2</span> Anova</h3>
+<h3><span class="header-section-number">4.8.2</span> Anova</h3>
 <p>Para todas as variáveis independentes</p>
 <pre class="r"><code>anova(logit05_2simples, test=&quot;Chisq&quot;)</code></pre>
 </div>
 <div id="log-likelihood" class="section level3">
-<h3><span class="header-section-number">4.7.3</span> Log-Likelihood</h3>
+<h3><span class="header-section-number">4.8.3</span> Log-Likelihood</h3>
 <pre class="r"><code>#Log-Likelihood
 logLik(logit05_2simples)
 
@@ -1494,7 +1594,7 @@ var.test(logit05_2simples,logit05_1)
 #tem sempre de se verifiar os dois</code></pre>
 </div>
 <div id="matriz-de-confusão-binários" class="section level3">
-<h3><span class="header-section-number">4.7.4</span> Matriz de confusão (binários)</h3>
+<h3><span class="header-section-number">4.8.4</span> Matriz de confusão (binários)</h3>
 <pre class="r"><code>library(pROC)
 
 #matriz de confusão (CM)
@@ -1517,7 +1617,7 @@ roc(CHANGE~logit05_2simples$fitted.values, data = MODEL05, plot = TRUE, main = &
 wilcox.test(data=MODEL05, CHANGE ~Predict_logit05_2simples)</code></pre>
 </div>
 <div id="pseudo-r2" class="section level3">
-<h3><span class="header-section-number">4.7.5</span> Pseudo R2</h3>
+<h3><span class="header-section-number">4.8.5</span> Pseudo R2</h3>
 <p>Devolve vários R2:<br />
 - LogLikelihood<br />
 - LL0 - intercept only<br />
@@ -1529,7 +1629,7 @@ wilcox.test(data=MODEL05, CHANGE ~Predict_logit05_2simples)</code></pre>
 pR2(logit05_2simples)</code></pre>
 </div>
 <div id="hosmer-lemeshow-para-binarios" class="section level3">
-<h3><span class="header-section-number">4.7.6</span> Hosmer-Lemeshow, para binarios</h3>
+<h3><span class="header-section-number">4.8.6</span> Hosmer-Lemeshow, para binarios</h3>
 <p>Um bom resultado é o que não rejeita H0, portanto p&gt;0.05</p>
 <pre class="r"><code>library(ResourceSelection)
 hoslem.test(MODEL05$CHANGE, fitted(logit05_2simples), g=10)

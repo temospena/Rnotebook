@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _October 7, 2019_
+date: _December 12, 2019_
 output:
   html_document:
     highlight: textmate
@@ -26,6 +26,7 @@ button.btn:before
     width:15px;
 }
 </style>
+
 
 
 ## Sobre
@@ -58,9 +59,9 @@ library(readxl) #excel
 library(lessR) #simplificar código
 
 #manipular tabelas
+library(tidyverse)
 library(reshape2)
 library(dplyr)
-library(tidyverse)
 library(tidyr) #obsoleto
 library(purrr)
 library(tibble)
@@ -102,7 +103,12 @@ library(lmtest) #para LLratio
 library(pscl) #para pseudo-r2
 library(ResourceSelection) #para Hosmer-Lemeshow test
 library(mfx) #para efeitos marginais
-library(stargazer)
+library(ape) #para auto-correlações espaciais
+
+
+#visualização de dados em tabelas limpas
+library(stargazer) #contínuas
+library(summarytools) #contínuas e categóricas
 ```
 
 ##Definição do ambiente de trabalho
@@ -1124,6 +1130,109 @@ plot(ResultyGs_1, type="bar", centered=FALSE)
 
 
 #Modelação
+##Tabelas resumo dos dados
+
+```r
+#só para contínuas, estilo latex
+library(stargazer)
+stargazer::stargazer(TODOS[,c(3,15:17)], type = "text", title = "Descriptive statistics", digits=1) #mudar o type para text, latex ou htm
+```
+
+```
+## 
+## Descriptive statistics
+## ==================================================================
+## Statistic      N    Mean   St. Dev. Min Pctl(25) Pctl(75)   Max   
+## ------------------------------------------------------------------
+## Age          1,079  39.6     11.0   16     31       46       83   
+## lenght        962  8,539.0 8,446.6  0.0 3,018.3  10,703.2 62,056.5
+## DistCiclov    962  2,355.4 2,009.5  0.0  587.7   3,663.2  9,171.0 
+## PercCiclovia  962   34.5     27.2   0.0   11.1     53.8    100.0  
+## ------------------------------------------------------------------
+```
+
+```r
+#tabela com a descrição das variáveis contínuas e categóricas!
+library(summarytools) #para todo o tipo, gera um html
+DescStat<-dfSummary(TODOS[,c(3,4,8,15)])
+view(DescStat) #abrir o botão do view pane para o browser, guardar como html
+```
+<!--html_preserve--><div class="container st-container">
+<h3>Data Frame Summary</h3>
+<strong>
+TODOS
+<br/>
+</strong>
+<strong>Dimensions</strong>: 1079 x 4
+  <br/><strong>Duplicates</strong>: 37
+<br/>
+<table class="table table-striped table-bordered st-table st-table-striped st-table-bordered st-multiline ">
+  <thead>
+    <tr>
+      <th align="center" class="no st-protect-top-border"><strong>No</strong></th>
+      <th align="center" class="variable st-protect-top-border"><strong>Variable</strong></th>
+      <th align="center" class="stats.values st-protect-top-border"><strong>Stats / Values</strong></th>
+      <th align="center" class="freqs.pct.valid st-protect-top-border"><strong>Freqs (% of Valid)</strong></th>
+      <th align="center" class="graph st-protect-top-border"><strong>Graph</strong></th>
+      <th align="center" class="missing st-protect-top-border"><strong>Missing</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">1</td>
+      <td align="left">Age
+[integer]</td>
+      <td align="left">Mean (sd) : 39.6 (11)
+min < med < max:
+16 < 39 < 83
+IQR (CV) : 15 (0.3)</td>
+      <td align="left" style="vertical-align:middle">60 distinct values</td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAKhJREFUaN7t1sENgCAMhWFWwA3UDWT/3RQOaggUWkk05n8Hw+lLk9Kic8QSX8gSM3tFBGwNR8DAwL6Jqaa9hanKAxuFpR6Owi4HDAzsI1g248+wzAEDAwN7G0s7bhQWPxsYGBiYDuvYQ/1YaJd3x0r/eWas5oD9FJNvrhKTywMDAwN7HxOfTC0mOjlWXbcWrFoemIyVumDGSuWBdWBnF6Z0us/m4zhiyQ62nh/6jRAyZgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">0
+(0%)</td>
+    </tr>
+    <tr>
+      <td align="center">2</td>
+      <td align="left">Gender
+[factor]</td>
+      <td align="left">1. Male
+2. Female
+3. Other</td>
+      <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">519</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">48.1%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">557</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">51.6%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">3</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">0.3%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFoAAABQBAMAAABrHX9XAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAE5JREFUSMft1MEJACAIQNFWcARrg9x/tzp0TwlC4f/zuyhoa3XrjlTk6GH30Gj0q47dpfhKpz1T7gIbNJtoNPqjjl1xnu8T04pGo4vrii0NwIcKfKw8lwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">0
+(0%)</td>
+    </tr>
+    <tr>
+      <td align="center">3</td>
+      <td align="left">Income
+[ordered, factor]</td>
+      <td align="left">1. Live with difficulties
+2. Live with moderate ease
+3. Live without difficulties</td>
+      <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">79</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">8.0%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">529</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">53.2%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">386</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">38.8%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFwAAABQBAMAAABmAw8QAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAFdJREFUSMdjYBjaQAkMFAUJAahyZWMQGFU+qnxUOd2Vk5hXCaobxMqViAQoAUkQGI0qH1U+qnxglZOYtQdVsUTNUkwRQznegBxVPqp8VDntlJOYV4cqAACzn4rEzoWdkQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="center">85
+(7.88%)</td>
+    </tr>
+    <tr>
+      <td align="center">4</td>
+      <td align="left">lenght
+[numeric]</td>
+      <td align="left">Mean (sd) : 8539 (8446.6)
+min < med < max:
+0 < 5922.2 < 62056.5
+IQR (CV) : 7684.9 (1)</td>
+      <td align="left" style="vertical-align:middle">944 distinct values</td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAI5JREFUaN7t2cENgCAMhWFW0A2EDWT/3VTkYCAKLajR/O9AwuVLD6WBYAzRxIYMjYmY82tmMDAwMDAwMLA7sXB7mTph2+LBwMDAwMDAwMDAwMDAHsYannY55vTlgYH9BdP99pxg+x7sZUw6Jy8x6RgvY4LyypjgRHweqzurldihVXphSfONKR4x2yWGaLIAqwGC8JpY/y0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDB5eBwKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE5LTEyLTAyVDE4OjA5OjAwKzAwOjAwCCWktgAAAABJRU5ErkJggg=="></td>
+      <td align="center">117
+(10.84%)</td>
+    </tr>
+  </tbody>
+</table>
+</div><!--/html_preserve-->
+
+
 ##Matrizes de correlação, em plots bonitos
 
 ```r
@@ -1764,6 +1873,7 @@ ggplot(dest.xy[which(dest.xy$Freq>50),], aes(oX, oY))+
   #Set black background, ditch axes and fix aspect ratio
   theme(panel.background = element_rect(fill='black',colour='black'))+quiet+coord_equal(xlim=c(-9.238472,-9.088783), ylim=c(38.690601,38.796908))
 ```
+
 
 ##Calcular matriz de distâncias
 [rever isto]
