@@ -85,9 +85,13 @@ load(".RData")
 knitr::opts_chunk$set(
   fig.path = "README_figs/README-"
 )
+#, results="asis"
+```
+```{r summary tools css, echo=FALSE, results='hide'}
+suppressPackageStartupMessages(library(summarytools))
+st_css()
 ```
 ```{r summary tools settings, echo = FALSE, results='hide'}
-library(summarytools)
 st_options(bootstrap.css     = FALSE,       # Already part of the theme so no need for it
            plain.ascii       = FALSE,       # One of the essential settings
            style             = "rmarkdown", # Idem.
@@ -95,7 +99,7 @@ st_options(bootstrap.css     = FALSE,       # Already part of the theme so no ne
            footnote          = NA,          # Keeping the results minimalistic
            subtitle.emphasis = FALSE)       # For the vignette theme, this gives
                                             # much better results. Your mileage may vary.
-st_css()
+
 ```
 ## Sobre
 Este é um bloco de notas virtuais para mim mesma, que usa o [R](https://www.r-project.org/), o [R Studio](https://www.rstudio.com/) e o [R Markdown](http://rmarkdown.rstudio.com).
@@ -1110,7 +1114,7 @@ plot(ResultyGs_1, type="bar", centered=FALSE)
 
 
 #Modelação
-##Tabelas resumo dos dados
+##Tabelas resumo dos dados  
 ```{r stargazer tables, echo=T, message=FALSE, warning=FALSE}
 #só para contínuas, estilo latex
 library(stargazer)
@@ -1122,9 +1126,12 @@ library(summarytools) #para todo o tipo, gera um html
 DescStat<-dfSummary(TODOS[,c(3,4,8,15)])
 view(DescStat) #abrir o botão do view pane para o browser, guardar como html
 ```
-```{r summary tables show, echo=FALSE, fig.width=5, message=FALSE, warning=FALSE}
-print(DescStat,style = "grid",plain.ascii = FALSE, valid.col=F, method = "render", tmp.img.dir= "/tmp")
-#está com o erro da largura da coluna 2: ver github deles que explicam
+```{r, results='asis', echo=FALSE}
+st_css()
+#pelos vistos isto tem de ser metido aqui antes, no markdown, apesar de já estar lá em cima..
+```
+```{r summary tables show, echo=FALSE, message=FALSE, warning=FALSE}
+print(DescStat, method = "render") #valid.col=F,
 ```
 
 
