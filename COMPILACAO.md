@@ -10,6 +10,11 @@ output:
     toc_depth: 4
     toc_float: true
     keep_md: true
+    
+bibliography: refs.bib
+csl: apa.csl
+link-citations: yes
+
 #runtime: shiny
 ---
 <style type="text/css">
@@ -1152,6 +1157,7 @@ stargazer::stargazer(TODOS[,c(3,15:17)], type = "text", title = "Descriptive sta
 ## ------------------------------------------------------------------
 ```
 
+
 ```r
 #tabela com a descrição das variáveis contínuas e categóricas!
 library(summarytools) #para todo o tipo, gera um html
@@ -1392,7 +1398,7 @@ DATA[is.na(DATA)]<-0
 ```
 
 ###Modelos logit binários
-Ver @Field2019  
+Ver @Field2009  
 Ver também mais [aqui](https://stats.idre.ucla.edu/r/dae/logit-regression/)
 
 ```r
@@ -2025,3 +2031,4 @@ seq(from = "2001", to="2018", by=1) %>%
 save.image(".RData")
 ```
 
+# References
