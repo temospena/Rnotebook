@@ -1,4 +1,4 @@
-# rosixRnotebook
+# rosix Rnotebook
 ## About
 
 Este é um bloco de notas virtuais para mim mesma, que usa o [R](https://www.r-project.org/), o [R Studio](https://www.rstudio.com/) e o [R Markdown](http://rmarkdown.rstudio.com).
