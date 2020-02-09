@@ -895,6 +895,21 @@ ggplot(DF_summary, aes(B3types, CHANGE_Class3)) +
 ```
 
 ![](README_figs/README-plot bolas-1.png)<!-- -->
+Alterar cores e adicionar labels nas bolas  
+
+```r
+##criar coluna com a cor
+DF_summary$prob <- c("g","y","y","g","g","y","r","g","g") #green, yellow, red 
+ggplot(DF_summary, aes(B3types, CHANGE_Class3)) +
+  geom_point(aes(size=count, colour=factor(prob)))+scale_color_manual(values = c("#00BA38", "#F8766D","#619CFF")) +
+  geom_text(data=DF_summary[DF_summary$count>25,],aes(label = count), size=4) +
+  geom_text(data=DF_summary[DF_summary$count<25,],aes(label = count), hjust=-1,vjust=-1, size=4) + #para as bolas pequenas
+  scale_size(range = c(1, 30))   + theme(legend.position="none") +
+  labs(title = "Types of potential cyclists", x = "Stages of Change", y = "Change class")
+```
+
+![](README_figs/README-plot bolas labels-1.png)<!-- -->
+
   
 ##Gráficos de dispersão, com indicação da linha de tendência
 
