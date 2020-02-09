@@ -481,13 +481,30 @@ write.csv(PERSONAL, "personal.csv")
 summary(TODOS$IDADE)
 ```
 
-###Chi quadrado
+##Chi quadrado
 
 ```r
 chisq.test(table(CANDNC$TYPE, CANDNC$Gender))
 ```
 
-###Correlações
+##T-test  
+Comparar duas variáveis. É mesmo superior? Inferior? Igual?
+
+```r
+#t.test(x, y = NULL, alternative = c("two.sided", "less", "greater"), mu = 0, 
+#       paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$SumCiclistas, c2017$SumCiclistas, alternative = "greater", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95) #paired - linha a linha
+
+t.test(c2018$Mulher/c2018$SumCiclistas, c2017$Mulher/c2017$SumCiclistas, alternative = "greater", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$CCapacete/c2018$SumCiclistas, c2017$CCapacete/c2017$SumCiclistas, alternative = "less", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)
+```
+
+##Correlações
 
 ```r
 # Pearson
@@ -499,7 +516,7 @@ cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="kendall"
 cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="spearm", alternative = "g")
 cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="spearm", alternative = "two.sided")
 ```
-
+  
 
 #Gráficos e plots
 __VER [CHEATSHEET do ggplot](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf) __  

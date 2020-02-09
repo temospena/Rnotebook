@@ -689,12 +689,27 @@ write.csv(PERSONAL, &quot;personal.csv&quot;)</code></pre>
 <h1><span class="header-section-number">2</span> Estatísticas simples</h1>
 <pre class="r"><code>#média, quartis
 summary(TODOS$IDADE)</code></pre>
-<div id="chi-quadrado" class="section level3">
-<h3><span class="header-section-number">2.0.1</span> Chi quadrado</h3>
+<div id="chi-quadrado" class="section level2">
+<h2><span class="header-section-number">2.1</span> Chi quadrado</h2>
 <pre class="r"><code>chisq.test(table(CANDNC$TYPE, CANDNC$Gender))</code></pre>
 </div>
-<div id="correlações" class="section level3">
-<h3><span class="header-section-number">2.0.2</span> Correlações</h3>
+<div id="t-test" class="section level2">
+<h2><span class="header-section-number">2.2</span> T-test</h2>
+<p>Comparar duas variáveis. É mesmo superior? Inferior? Igual?</p>
+<pre class="r"><code>#t.test(x, y = NULL, alternative = c(&quot;two.sided&quot;, &quot;less&quot;, &quot;greater&quot;), mu = 0, 
+#       paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$SumCiclistas, c2017$SumCiclistas, alternative = &quot;greater&quot;, mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95) #paired - linha a linha
+
+t.test(c2018$Mulher/c2018$SumCiclistas, c2017$Mulher/c2017$SumCiclistas, alternative = &quot;greater&quot;, mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$CCapacete/c2018$SumCiclistas, c2017$CCapacete/c2017$SumCiclistas, alternative = &quot;less&quot;, mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)</code></pre>
+</div>
+<div id="correlações" class="section level2">
+<h2><span class="header-section-number">2.3</span> Correlações</h2>
 <pre class="r"><code># Pearson
 cor.test(MOTIVATORS$NMotivators_16, MOTIVATORS$NMotivators_50)
 
