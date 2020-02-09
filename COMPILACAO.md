@@ -1590,7 +1590,8 @@ for (i in 5:20) {
 #Operações geoespaciais
 Usar a library sf - spatial features, e trabalhar com shapefiles  
 
-##Importar shapefiles  
+##Importar, converter, gravar  
+###Importar shapefiles  
 
 ```r
 ODbike_250mRedeCiclavel2001<-st_read("D:/rosa/Dropbox/MIT/Inquerito Lisboa/GIS/ODbike_250mRedeCiclavel2001.shp")
@@ -1608,14 +1609,19 @@ Verificar se é um ficheiro apenas de dataframe ou se tem componente de geometri
 
 ```r
 class(ODbike_250mANOS)
+```
+###Converter DF para shp e shp para DF  
 
-#remover a componente de geomeria / passar de shapefile para tabela - dá jeito para algumas operações que não são possíveis com shapes como o merge
+```r
+#passar de shapefile para tabela
+#remover a componente de geomeria - dá jeito para algumas operações que não são possíveis com shapes como o merge
 ODbike_250mANOS$geometry<-NULL
 
 #transformar uma tabela em shapefile
 Flows<-st_as_sf(Flows,wkt = "geometry")
+Flows<-st_as_sf(Flows,wkt = "geometry", crs=4326) #determinar o crs directamente ali
 ```
-##Gravar shapefiles ou tsv
+###Gravar shapefiles ou tsv
 
 ```r
 #ver se é um sf (shapefile)

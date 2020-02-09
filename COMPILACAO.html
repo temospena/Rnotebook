@@ -1691,8 +1691,10 @@ for (i in 5:20) {
 <div id="operações-geoespaciais" class="section level1">
 <h1><span class="header-section-number">5</span> Operações geoespaciais</h1>
 <p>Usar a library sf - spatial features, e trabalhar com shapefiles</p>
-<div id="importar-shapefiles" class="section level2">
-<h2><span class="header-section-number">5.1</span> Importar shapefiles</h2>
+<div id="importar-converter-gravar" class="section level2">
+<h2><span class="header-section-number">5.1</span> Importar, converter, gravar</h2>
+<div id="importar-shapefiles" class="section level3">
+<h3><span class="header-section-number">5.1.1</span> Importar shapefiles</h3>
 <pre class="r"><code>ODbike_250mRedeCiclavel2001&lt;-st_read(&quot;D:/rosa/Dropbox/MIT/Inquerito Lisboa/GIS/ODbike_250mRedeCiclavel2001.shp&quot;)</code></pre>
 <p>Juntar várias shapes numa só - tem de se usar o rbind com features de class “geometry”</p>
 <pre class="r"><code>ODbike_250mANOS&lt;-rbind(ODbike_250mRedeCiclavel2001,ODbike_250mRedeCiclavel2002)
@@ -1701,16 +1703,20 @@ ODbike_250mANOS&lt;-rbind(ODbike_250mANOS,ODbike_250mRedeCiclavel2004)
 [...]
 ODbike_250mANOS&lt;-rbind(ODbike_250mANOS,ODbike_250mRedeCiclavel2017)</code></pre>
 <p>Verificar se é um ficheiro apenas de dataframe ou se tem componente de geometria</p>
-<pre class="r"><code>class(ODbike_250mANOS)
-
-#remover a componente de geomeria / passar de shapefile para tabela - dá jeito para algumas operações que não são possíveis com shapes como o merge
+<pre class="r"><code>class(ODbike_250mANOS)</code></pre>
+</div>
+<div id="converter-df-para-shp-e-shp-para-df" class="section level3">
+<h3><span class="header-section-number">5.1.2</span> Converter DF para shp e shp para DF</h3>
+<pre class="r"><code>#passar de shapefile para tabela
+#remover a componente de geomeria - dá jeito para algumas operações que não são possíveis com shapes como o merge
 ODbike_250mANOS$geometry&lt;-NULL
 
 #transformar uma tabela em shapefile
-Flows&lt;-st_as_sf(Flows,wkt = &quot;geometry&quot;)</code></pre>
+Flows&lt;-st_as_sf(Flows,wkt = &quot;geometry&quot;)
+Flows&lt;-st_as_sf(Flows,wkt = &quot;geometry&quot;, crs=4326) #determinar o crs directamente ali</code></pre>
 </div>
-<div id="gravar-shapefiles-ou-tsv" class="section level2">
-<h2><span class="header-section-number">5.2</span> Gravar shapefiles ou tsv</h2>
+<div id="gravar-shapefiles-ou-tsv" class="section level3">
+<h3><span class="header-section-number">5.1.3</span> Gravar shapefiles ou tsv</h3>
 <pre class="r"><code>#ver se é um sf (shapefile)
 class(GridORD)
 
@@ -1726,8 +1732,9 @@ write.table(TaxisORD,&quot;TaxisORD.txt&quot;,sep=&quot;\t&quot;,row.names=FALSE
 <p><strong>Dica:</strong> Se o shapefile já existir com o mesmo nome na pasta (tentativa de overrite), o R crasha!</p>
 </blockquote>
 </div>
+</div>
 <div id="projecções" class="section level2">
-<h2><span class="header-section-number">5.3</span> Projecções</h2>
+<h2><span class="header-section-number">5.2</span> Projecções</h2>
 <p>Projectar no sistema de coordenadas (CRS)<br />
 <strong>4326</strong> é o sistema usado pelo google e gps (WGS84) - <a href="https://epsg.io/4326">ver</a><br />
 <strong>3857</strong> é o genérico, não projectado - <a href="https://epsg.io/3857">ver</a></p>
@@ -1742,7 +1749,7 @@ st_set_crs(ODbike_250mANOS)</code></pre>
 LisboaLimite &lt;-read_sf(&quot;D:/rosa/Dropbox/Tese/GIS/Lisboa_CAOP2015/Lisboa_Limite_CAOP2015_PNacoes.shp&quot;)
 LisboaLimite &lt;-st_transform(LisboaLimite,  crs = 4326)</code></pre>
 <div id="criar-uma-shapefile-e-projectar" class="section level3">
-<h3><span class="header-section-number">5.3.1</span> Criar uma shapefile e projectar</h3>
+<h3><span class="header-section-number">5.2.1</span> Criar uma shapefile e projectar</h3>
 <p>Criar um ponto</p>
 <pre class="r"><code>#criar um ponto com coordenadas conhecidas
 PontoD &lt;- data.frame(longitude = c(-9.121910), latitude = c(38.767135))
@@ -1750,13 +1757,13 @@ PontoD &lt;- st_as_sf(PontoD,coords = c(&quot;longitude&quot;, &quot;latitude&qu
 </div>
 </div>
 <div id="geocoding" class="section level2">
-<h2><span class="header-section-number">5.4</span> Geocoding</h2>
+<h2><span class="header-section-number">5.3</span> Geocoding</h2>
 <div id="localizar-pontos-através-de-morada" class="section level3">
-<h3><span class="header-section-number">5.4.1</span> Localizar pontos, através de morada</h3>
+<h3><span class="header-section-number">5.3.1</span> Localizar pontos, através de morada</h3>
 <p><em>Por completar</em> &gt;<strong>Dica</strong>: ver <a href="https://github.com/temospena/CP7">CP7</a> no github e juntar aos códigos postais com um <code>left_join</code></p>
 </div>
 <div id="calcular-percursos-ou-distâncias-e-tempos-por-determinado-modo-de-transporte" class="section level3">
-<h3><span class="header-section-number">5.4.2</span> Calcular percursos ou distâncias e tempos, por determinado modo de transporte</h3>
+<h3><span class="header-section-number">5.3.2</span> Calcular percursos ou distâncias e tempos, por determinado modo de transporte</h3>
 <pre class="r"><code>#pelo openrouteservice - tem cycling
 lista1&lt;-list(c(38.74684,-9.150085),
              c(38.74626,-9.143990),
@@ -1786,7 +1793,7 @@ ver ainda o <a href="https://www.cyclestreets.net/api/">Cyclestreets package</a>
 </div>
 </div>
 <div id="cálculo-da-geometria" class="section level2">
-<h2><span class="header-section-number">5.5</span> Cálculo da geometria</h2>
+<h2><span class="header-section-number">5.4</span> Cálculo da geometria</h2>
 <pre class="r"><code>#cria um campo em metros (caso a shape esteja projectada)
 ODbike_250mANOS$lenght&lt;-st_length(ODbike_250mANOS)
 
@@ -1797,7 +1804,7 @@ Taxis$Longitude&lt;-testcoord$X #escrever por cima dos valores existentes anteri
 Taxis$Latitude&lt;-testcoord$Y 
 st_write(Taxis,&quot;D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp&quot;) #gravar novamente</code></pre>
 <div id="conversão-em-wkt" class="section level3">
-<h3><span class="header-section-number">5.5.1</span> Conversão em WKT</h3>
+<h3><span class="header-section-number">5.4.1</span> Conversão em WKT</h3>
 <p>Well Known Text: ver <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry">wiki</a></p>
 <pre class="r"><code>#colar os campos Lat e Long em wkt, neste caso pontos
 ListaCPteste$geometry&lt;-paste(&quot;POINT(&quot;,ListaCPteste$Longitude,&quot; &quot;,ListaCPteste$Latitude,&quot;)&quot;)
@@ -1808,7 +1815,7 @@ st_crs(ListaCPteste) &lt;- 4326 #meter a projecção WGS84
 </div>
 </div>
 <div id="intersect" class="section level2">
-<h2><span class="header-section-number">5.6</span> Intersect</h2>
+<h2><span class="header-section-number">5.5</span> Intersect</h2>
 <p>Exemplo com as viagens de taxi</p>
 <pre class="r"><code>#Atribuir GRID ID a cada ponto [st_intersection(points, polygons)]
 a&lt;-st_intersects(TaxisORD, GridORD, sparse = TRUE)
@@ -1829,9 +1836,9 @@ GridORD$ViagensSemana3&lt;-lengths(st_intersects(GridORD, TaxisORD[TaxisORD$Sema
 GridORD$Viagens2016Origem&lt;-lengths(st_intersects(GridORD, TaxisORD[TaxisORD$Ano==&quot;2016&quot; &amp; TaxisORD$OD==0,]))</code></pre>
 </div>
 <div id="plotar-mapas" class="section level2">
-<h2><span class="header-section-number">5.7</span> Plotar mapas</h2>
+<h2><span class="header-section-number">5.6</span> Plotar mapas</h2>
 <div id="definir-temas" class="section level3">
-<h3><span class="header-section-number">5.7.1</span> Definir temas</h3>
+<h3><span class="header-section-number">5.6.1</span> Definir temas</h3>
 Ver exemplos, dependendo se é full map ou em facets os tamanhos de letra serão diferentes<br />
 
 <p>
@@ -1899,7 +1906,7 @@ mapabase2&lt;- get_map(bbox,zoom=13,maptype = &quot;toner-lite&quot;,source = &q
 ggmap(mapabase2) + mapTheme()</code></pre>
 </div>
 <div id="mapas-sobrepostos-mas-sem-facets" class="section level3">
-<h3><span class="header-section-number">5.7.2</span> Mapas sobrepostos mas sem facets</h3>
+<h3><span class="header-section-number">5.6.2</span> Mapas sobrepostos mas sem facets</h3>
 <pre class="r"><code>#Ciclovias e pontos de contagem, com o limite de Lisboa e o basemap
 ggmap(mapabase)+ geom_sf(data=CicloviasActual,inherit.aes = FALSE,aes(),color=&quot;#33A02C&quot;,size=0.8,alpha=0.2)+
   geom_sf(data=Pontos,inherit.aes = FALSE,aes(),color=&quot;#92324f&quot;,size=3)+
@@ -1914,7 +1921,7 @@ ggmap(mapabase)+ geom_sf(data=CicloviasActual,inherit.aes = FALSE,aes(),color=&q
     guides(color=&quot;none&quot;)</code></pre>
 </div>
 <div id="mapas-em-facets" class="section level3">
-<h3><span class="header-section-number">5.7.3</span> Mapas em facets</h3>
+<h3><span class="header-section-number">5.6.3</span> Mapas em facets</h3>
 <pre class="r"><code>#comparação das contagens, facets com ano
 ggmap(mapabase) + geom_sf(data=LisboaLimite,inherit.aes = FALSE, size=1,fill=NA)+ coord_sf(crs = st_crs(4326))+
   geom_point(data=filter(PontosGIS,Hora_i==&quot;17:00:00&quot;), aes(long,lat, size=SumFluxos, color=factor(Ano)), alpha=0.5) +
