@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _December 12, 2019_
+date: _February 9, 2020_
 output:
   html_document:
     highlight: textmate
@@ -186,6 +186,12 @@ library(ape) #para auto-correlações espaciais
 library(stargazer) #contínuas
 library(summarytools) #contínuas e categóricas
 ```
+```{rlibrary downgrade, eval=F}
+#instalar uma versão específica de um package - útil para donwgrade
+require(devtools)
+install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.org")
+```
+
 
 ##Definição do ambiente de trabalho
 Isto permite que não se tenha de estar sempre a escrever o caminho completo do ficheiro a abrir ou a guardar (outputs).  
@@ -347,9 +353,10 @@ MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by="ID", all.x=T, all.y=F)
 #fazer um merge por mais do que uma variável
 MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by=c("ID","Type"), all.x=T, all.y=F)
 
-#fazer um merge usando o tydiverse - assume as variáveis iguais
-MCBARRIERS <-left_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
-MCBARRIERS <-right_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
+#fazer um merge usando o tydiverse
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ) #assume as variáveis que têm o mesmo nome
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ, by=c("nomeA"="nomeB")) #declarar as variáveis que quero que faça o mach, em ambas as tabelas
+MCBARRIERS <-right_join(MCBARRIERSMEAN,MCBARRIERSFREQ)
 
 #remover linhas exactamente iguais (duplicados)
 VIAGENS<-unique(VIAGENS)
@@ -1107,14 +1114,16 @@ grid.arrange(GPersy1, GPersy2, GPersy3,  ncol = 3)
 ```
 Exemplos  
 ```{r plot likert2, echo=T, message=FALSE, warning=FALSE}
+
 library(likert)
 Resultyy3 = likert(Personalityyy3)
 plot(Resultyy3, type="bar",centered=F)+ggtitle("Cyclists")
 ```
-```{r plot likert3, echo=T, fig.height=9, fig.width=6, message=FALSE, warning=FALSE}
+```{r plot likert3, echo=T, fig.height=9, fig.width=6, message=FALSE, warning=FALSE, error=TRUE}
 ResultyG_1 <- likert(Personalityyy[c(1:6)], grouping=Personalityyy$CHANGE_Class3)
 ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$results[,1])
 plot(ResultyGs_1, type="bar", centered=FALSE)
+#TIRAR O ERROR TRUE E VER O QUE SE PASSA
 ```
 
 
@@ -1539,7 +1548,7 @@ st_write(Taxis,"D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp") #gravar n
 ```
 
 ###Conversão em WKT
-Well Known Text: ver [wiki]()
+Well Known Text: ver [wiki](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
 ```{r sf wkt, eval=F}
 #colar os campos Lat e Long em wkt, neste caso pontos
 ListaCPteste$geometry<-paste("POINT(",ListaCPteste$Longitude," ",ListaCPteste$Latitude,")")
@@ -1802,6 +1811,7 @@ sl$alunos = 1 #cada route tem 1 aluno a fazer (para depois agregar)
 rnetD = overline2(sl, "alunos") #partir as rotas em segmentos e somá-los
 lwd = rnetD$alunos / mean(rnetD$alunos) #line width
 plot(rnetD, lwd = lwd)
+#só está a funcionar com a versão 0.3.1
 ```
 
 ###Plotar em mapa interactivo, com o leaflet

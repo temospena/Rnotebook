@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _December 12, 2019_
+date: _February 9, 2020_
 output:
   html_document:
     highlight: textmate
@@ -116,6 +116,13 @@ library(ape) #para auto-correlações espaciais
 library(stargazer) #contínuas
 library(summarytools) #contínuas e categóricas
 ```
+
+```rlibrary
+#instalar uma versão específica de um package - útil para donwgrade
+require(devtools)
+install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.org")
+```
+
 
 ##Definição do ambiente de trabalho
 Isto permite que não se tenha de estar sempre a escrever o caminho completo do ficheiro a abrir ou a guardar (outputs).  
@@ -280,9 +287,10 @@ MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by="ID", all.x=T, all.y=F)
 #fazer um merge por mais do que uma variável
 MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by=c("ID","Type"), all.x=T, all.y=F)
 
-#fazer um merge usando o tydiverse - assume as variáveis iguais
-MCBARRIERS <-left_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
-MCBARRIERS <-right_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
+#fazer um merge usando o tydiverse
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ) #assume as variáveis que têm o mesmo nome
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ, by=c("nomeA"="nomeB")) #declarar as variáveis que quero que faça o mach, em ambas as tabelas
+MCBARRIERS <-right_join(MCBARRIERSMEAN,MCBARRIERSFREQ)
 
 #remover linhas exactamente iguais (duplicados)
 VIAGENS<-unique(VIAGENS)
@@ -1132,7 +1140,13 @@ ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$result
 plot(ResultyGs_1, type="bar", centered=FALSE)
 ```
 
-![](README_figs/README-plot likert3-1.png)<!-- -->
+```
+## Error in FUN(newX[, i], ...): invalid 'type' (character) of argument
+```
+
+```r
+#TIRAR O ERROR TRUE E VER O QUE SE PASSA
+```
 
 
 #Modelação
@@ -1666,7 +1680,7 @@ st_write(Taxis,"D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp") #gravar n
 ```
 
 ###Conversão em WKT
-Well Known Text: ver [wiki]()
+Well Known Text: ver [wiki](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
 
 ```r
 #colar os campos Lat e Long em wkt, neste caso pontos
@@ -1953,6 +1967,10 @@ plot(rnetD, lwd = lwd)
 ```
 
 ![](README_figs/README-stplanr agregate-1.png)<!-- -->
+
+```r
+#só está a funcionar com a versão 0.3.1
+```
 
 ###Plotar em mapa interactivo, com o leaflet
 
