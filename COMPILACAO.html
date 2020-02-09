@@ -280,8 +280,7 @@ button.btn:before
 <p>Aqui pretendo dividir em capítulos, tais como:<br />
 1. Scripts básicos de R, tais como libraries, importar tabelas, apagar linhas, ler colunas, mudar nomes de variáveis, gravar outputs<br />
 2. Estatísticas simples<br />
-3. Plotagem de gáficos<br />
-4. Modelação<br />
+3. Plotagem de gáficos 4. Modelação<br />
 5. Operações geoespaciais<br />
 6. Matrizes OD<br />
 7. Rotinas e funções</p>
@@ -535,8 +534,20 @@ rm(CBARRIERS,NMOTIVATORS) #mais do que uma
 #omitir o nome da tabela, para referir simplesmente à variável
 attach(TABELA)
 detach(TABELA) #reverter</code></pre>
+<div id="concatenate-e-seprate" class="section level3">
+<h3><span class="header-section-number">1.5.1</span> Concatenate e seprate</h3>
+<pre class="r"><code>#juntar variáveis numa só
+TABELA$coordenadas&lt;-paste(&quot;POINT(&quot;,TABELA$Longitude,&quot; &quot;,TABELA$Latitude,&quot;)&quot;)
+TABELA$gorila&lt;-paste(&quot;go&quot;,&quot;ri&quot;,&quot;la&quot;, sep = &quot;_&quot;) #go_ri_la
+TABELA$gorila&lt;-paste(&quot;go&quot;,&quot;ri&quot;,&quot;la&quot;, sep = &quot;&quot;) #gorila
+TABELA$gorila&lt;-paste0(&quot;go&quot;,&quot;ri&quot;,&quot;la&quot;) #gorila
+
+#separar variveis delimitadas por...
+ALOJAMENTO&lt;-separate(ALOJAMENTO, ID_aloj, into=c(&quot;IDa&quot;, &quot;ID1&quot;), sep=&quot;F1_&quot;, remove = F)
+#separa a variável ID_aloj em duas (dar os nomes), segundo um padrão, remover a variável original por default</code></pre>
+</div>
 <div id="mudar-o-tipo-de-variável" class="section level3">
-<h3><span class="header-section-number">1.5.1</span> Mudar o tipo de variável</h3>
+<h3><span class="header-section-number">1.5.2</span> Mudar o tipo de variável</h3>
 <pre class="r"><code>TABELA$IDADE&lt;-as.numeric(TABELA$IDADE)
 TABELA$IDADE&lt;-as.character(TABELA$IDADE)
 
@@ -554,7 +565,7 @@ Taxis$DataHora2016&lt;-paste(Taxis$Data2016,Taxis$Hora2016, sep = &quot; &quot;)
 Taxis$DataHora2016&lt;-as.POSIXct(Taxis$DataHora2016, format=&quot;%Y-%m-%d %H:%M:%S&quot;)</code></pre>
 </div>
 <div id="criar-tabela-com-data-sequencial-por-dia-ou-hora" class="section level3">
-<h3><span class="header-section-number">1.5.2</span> Criar tabela com data sequencial, por dia ou hora</h3>
+<h3><span class="header-section-number">1.5.3</span> Criar tabela com data sequencial, por dia ou hora</h3>
 <pre class="r"><code>#Cria uma tabela com todas as horas do ano de 2016
 Horas2016&lt;-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,23), by=&quot;hour&quot;)) #é aqui que podes trocar por dia ou minuto</code></pre>
 <blockquote>

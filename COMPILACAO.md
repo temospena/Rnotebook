@@ -40,13 +40,13 @@ Este é um bloco de notas virtuais para mim mesma, que usa o [R](https://www.r-p
 É um trabalho em actualização constante, onde procuro adicionar chunks de código, em linguagem R, para que possa voltar a usar no futuro sem pesquisar muito.
 
 Aqui pretendo dividir em capítulos, tais como:  
-  1.  Scripts básicos de R, tais como libraries, importar tabelas, apagar linhas, ler colunas, mudar nomes de variáveis, gravar outputs  
-  2.  Estatísticas simples  
-  3.  Plotagem de gáficos  
-  4.  Modelação  
-  5.  Operações geoespaciais  
-  6.  Matrizes OD  
-  7.  Rotinas e funções  
+    1.  Scripts básicos de R, tais como libraries, importar tabelas, apagar linhas, ler colunas, mudar nomes de variáveis, gravar outputs  
+    2.  Estatísticas simples  
+    3.  Plotagem de gáficos 
+    4.  Modelação  
+    5.  Operações geoespaciais  
+    6.  Matrizes OD  
+    7.  Rotinas e funções  
 
 
 __VER [CHEATSHEET do Markdown](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)  para melhores resultados__
@@ -314,6 +314,22 @@ rm(CBARRIERS,NMOTIVATORS) #mais do que uma
 attach(TABELA)
 detach(TABELA) #reverter
 ```
+
+###Concatenate e seprate  
+
+```r
+#juntar variáveis numa só
+TABELA$coordenadas<-paste("POINT(",TABELA$Longitude," ",TABELA$Latitude,")")
+TABELA$gorila<-paste("go","ri","la", sep = "_") #go_ri_la
+TABELA$gorila<-paste("go","ri","la", sep = "") #gorila
+TABELA$gorila<-paste0("go","ri","la") #gorila
+
+#separar variveis delimitadas por...
+ALOJAMENTO<-separate(ALOJAMENTO, ID_aloj, into=c("IDa", "ID1"), sep="F1_", remove = F)
+#separa a variável ID_aloj em duas (dar os nomes), segundo um padrão, remover a variável original por default
+```
+
+
 ###Mudar o tipo de variável
 
 ```r
