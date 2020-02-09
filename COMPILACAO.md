@@ -1421,6 +1421,11 @@ table(DATAMZ$Municipality) #ver a proporção de Municipios
 ##Preparar a tabela expandida com os choice sets##
 mldata <- mlogit.data(DATAMZ, choice="CHOICE", shape="wide")
 #whether 'long' if each row is an alternative or 'wide' if each row is an observation
+
+#Separar uma coluna em várias binárias
+library(fastDummies)
+dummy_columns() #Ver DV
+#especificar diferenças para chr e num
 ```
 >__Dica:__ Ver mais opções de preparação das tabelas para modelação [aqui](https://www.rdocumentation.org/packages/mlogit/versions/1.0-1/topics/mlogit.data)
 
