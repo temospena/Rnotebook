@@ -347,7 +347,8 @@ library(ape) #para auto-correlações espaciais
 
 #visualização de dados em tabelas limpas
 library(stargazer) #contínuas
-library(summarytools) #contínuas e categóricas</code></pre>
+library(summarytools) #contínuas e categóricas
+library(fastDummies) #criar variáveis dummy a partir de categóricas</code></pre>
 <pre class="rlibrary"><code>#instalar uma versão específica de um package - útil para donwgrade
 require(devtools)
 install_version(&quot;stplanr&quot;, version = &quot;0.3.1&quot;, repos = &quot;http://cran.us.r-project.org&quot;)</code></pre>
@@ -1544,13 +1545,16 @@ table(DATAMZ$Municipality) #ver a proporção de Municipios
 
 ##Preparar a tabela expandida com os choice sets##
 mldata &lt;- mlogit.data(DATAMZ, choice=&quot;CHOICE&quot;, shape=&quot;wide&quot;)
-#whether 'long' if each row is an alternative or 'wide' if each row is an observation
+#whether 'long' if each row is an alternative or 'wide' if each row is an observation</code></pre>
+<p>De uma para várias variáveis dummy, usando o <a href="https://github.com/jacobkap/fastDummies">fastDummies</a></p>
+<pre class="r"><code>library(fastDummies)
+#Separar uma coluna (modo escolhido) em várias binárias
+Biogeme3725$CHOICE &lt;- factor(Biogeme3725$MODOnovo, labels = c(&quot;Gerada&quot;,&quot;Pe&quot;,&quot;Bicicleta&quot;,&quot;Automovel&quot;,&quot;TP&quot;)) #mais vale criar o factor para depois ter logo o nome da var nas colunas novas
 
-#Separar uma coluna em várias binárias
-library(fastDummies)
-dummy_columns() #Ver DV
-#especificar diferenças para chr e num
-dummy_cols()</code></pre>
+Biogeme3725 &lt;- dummy_columns(Biogeme3725, select_columns =&quot;CHOICE&quot;, ignore_na=T) 
+#remove_first_dummy=T , se queremos ficar sem a primeia opção - útil no biogeme
+
+#às vezes pode haver diferenças para chr e num. ver vignete para mais opções</code></pre>
 <blockquote>
 <p><strong>Dica:</strong> Ver mais opções de preparação das tabelas para modelação <a href="https://www.rdocumentation.org/packages/mlogit/versions/1.0-1/topics/mlogit.data">aqui</a></p>
 </blockquote>

@@ -185,6 +185,7 @@ library(ape) #para auto-correlações espaciais
 #visualização de dados em tabelas limpas
 library(stargazer) #contínuas
 library(summarytools) #contínuas e categóricas
+library(fastDummies) #criar variáveis dummy a partir de categóricas
 ```
 ```{rlibrary downgrade, eval=F}
 #instalar uma versão específica de um package - útil para donwgrade
@@ -1311,12 +1312,19 @@ table(DATAMZ$Municipality) #ver a proporção de Municipios
 mldata <- mlogit.data(DATAMZ, choice="CHOICE", shape="wide")
 #whether 'long' if each row is an alternative or 'wide' if each row is an observation
 
-#Separar uma coluna em várias binárias
-library(fastDummies)
-dummy_columns() #Ver DV
-#especificar diferenças para chr e num
-dummy_cols()
 ```
+De uma para várias variáveis dummy, usando o [fastDummies](https://github.com/jacobkap/fastDummies)  
+```{r model DCM prep fastdummies, eval=F}
+library(fastDummies)
+#Separar uma coluna (modo escolhido) em várias binárias
+Biogeme3725$CHOICE <- factor(Biogeme3725$MODOnovo, labels = c("Gerada","Pe","Bicicleta","Automovel","TP")) #mais vale criar o factor para depois ter logo o nome da var nas colunas novas
+
+Biogeme3725 <- dummy_columns(Biogeme3725, select_columns ="CHOICE", ignore_na=T) 
+#remove_first_dummy=T , se queremos ficar sem a primeia opção - útil no biogeme
+
+#às vezes pode haver diferenças para chr e num. ver vignete para mais opções
+```
+
 >__Dica:__ Ver mais opções de preparação das tabelas para modelação [aqui](https://www.rdocumentation.org/packages/mlogit/versions/1.0-1/topics/mlogit.data)
 
 ###Modelo DCM
