@@ -1188,13 +1188,7 @@ ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$result
 plot(ResultyGs_1, type="bar", centered=FALSE)
 ```
 
-```
-## Error in FUN(newX[, i], ...): invalid 'type' (character) of argument
-```
-
-```r
-#TIRAR O ERROR TRUE E VER O QUE SE PASSA
-```
+![](README_figs/README-plot likert3-1.png)<!-- -->
 
 
 #Modelação
@@ -1426,6 +1420,7 @@ mldata <- mlogit.data(DATAMZ, choice="CHOICE", shape="wide")
 library(fastDummies)
 dummy_columns() #Ver DV
 #especificar diferenças para chr e num
+dummy_cols()
 ```
 >__Dica:__ Ver mais opções de preparação das tabelas para modelação [aqui](https://www.rdocumentation.org/packages/mlogit/versions/1.0-1/topics/mlogit.data)
 
@@ -1980,6 +1975,7 @@ st_distance(coordinates)
 ```
 
 ##Desire lines pelo stplanar
+ver @stplanr
 
 ```r
 #Viagens

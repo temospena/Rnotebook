@@ -1162,11 +1162,10 @@ library(likert)
 Resultyy3 = likert(Personalityyy3)
 plot(Resultyy3, type="bar",centered=F)+ggtitle("Cyclists")
 ```
-```{r plot likert3, echo=T, fig.height=9, fig.width=6, message=FALSE, warning=FALSE, error=TRUE}
+```{r plot likert3, echo=T, fig.height=9, fig.width=6, message=FALSE, warning=FALSE}
 ResultyG_1 <- likert(Personalityyy[c(1:6)], grouping=Personalityyy$CHANGE_Class3)
 ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$results[,1])
 plot(ResultyGs_1, type="bar", centered=FALSE)
-#TIRAR O ERROR TRUE E VER O QUE SE PASSA
 ```
 
 
@@ -1825,6 +1824,7 @@ st_distance(coordinates)
 ```
 
 ##Desire lines pelo stplanar
+ver @stplanr
 ```{r od2lines, eval=FALSE}
 #Viagens
 library(stplanr)
