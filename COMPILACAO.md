@@ -733,7 +733,7 @@ ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN
   scale_fill_brewer(palette="Paired") +  coord_cartesian(xlim=c(0,39)) + ylim(NA, 0.16)
 ```
 
-![](README_figs/README-plot barras h-1.png)<!-- -->
+![](README_figs/README-plot barras v-1.png)<!-- -->
 
 ```r
 #barras com realce dos quartis nas legendas
@@ -746,7 +746,7 @@ ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN
   scale_fill_manual(values = wes_palette("GrandBudapest1"), "Frequency of choices")  + coord_cartesian(xlim=c(0,45)) + ylim(NA, 0.14)
 ```
 
-![](README_figs/README-plot barras h-2.png)<!-- -->
+![](README_figs/README-plot barras v-2.png)<!-- -->
 
 ####Stacked 100%  
 
@@ -812,6 +812,19 @@ ggplot(data=subset(TComb2,(Freq>2 & Freq<100)), aes(x=reorder(Var1,Freq), y=Freq
   labs(title="Travel Mode alternative combinations", subtitle="Freq >2",x="Combinations")
 ggsave("TMode_Alternative_freq.png", width = 8.5, height = 11, dpi=300)
 ```
+####Stacked
+
+```r
+#gráfico barras verticais com dois valores, e x como factor
+ggplot(VIAGENSamlGAMA, aes(gama, viagens/1000, fill=inter) ) +  geom_bar(stat="identity")+
+  theme_classic()+
+  labs(title="Viagens AML",
+       subtitle="Número de viagens por gamas de distâncias",
+       x="Gama de distâncias [km]",
+       y="x1000 viagens")
+```
+
+![](README_figs/README-plot barras v stakednon100-1.png)<!-- -->
 
 ###Barras horizontais 
 
@@ -823,7 +836,7 @@ ggplot(CONTAGENSzonasMT, aes(x=reorder(Names,SumFluxos), y=SumFluxos, fill=facto
   coord_flip() + theme_minimal() + theme(legend.position = c(0.752, 0.305), legend.title = element_text(face="bold")) + labs(y="Pico de ciclistas por hora de ponta", x="Zonas")
 ```
 
-![](README_figs/README-plot barras v-1.png)<!-- -->
+![](README_figs/README-plot barras h-1.png)<!-- -->
 
 ```r
 #simplificado, com legendas nas barras
@@ -833,7 +846,7 @@ ggplot(CONTAGENSzonas, aes(x=reorder(Names,SumFluxos), y=SumFluxos4, fill=factor
   coord_flip() + theme_minimal() + labs(y="Média de ciclistas por hora de ponta", x="Zonas")
 ```
 
-![](README_figs/README-plot barras v-2.png)<!-- -->
+![](README_figs/README-plot barras h-2.png)<!-- -->
 
 ###Facets
 
@@ -1601,6 +1614,36 @@ for (i in 5:20) {
   print(hoslem.test(MODEL05$CHANGE, fitted(logit05_2simples), g=i)$p.value)
 }
 ```
+
+###Moran's I autocorrelação espacial  
+ver mais [aqui](https://stats.idre.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/)  
+
+```r
+library(ape)
+#ele não gosta de factores ordenados, de zeros, ou de distâncias infinitas
+str(MORADAS)
+MORADAS$classfactor<-as.numeric(MORADAS$CLASS) #tirar os factores ordenados com que vinha
+MORADAS$classfactor<-factor(MORADAS$classfactor)
+
+MORADASmoran<-MORADAS
+MORADASmoran$geometry<-NULL #tirar a geometria
+MORADASmoran<-na.omit(MORADASmoran) #tirar os NA
+MORADASmoran<-MORADASmoran[MORADASmoran$Orig_Lat!=0,] #tirar os zeros
+
+#criar a matrix de distâncias, a partide dos valores de Lat e Long
+ozone.dists <- as.matrix(dist(cbind(MORADASmoran$Orig_Long, MORADASmoran$Orig_Lat)))
+ozone.dists.inv <- 1/ozone.dists
+diag(ozone.dists.inv) <- 0
+ozone.dists.inv[is.infinite(ozone.dists.inv)] <- 0 #remover distâncias infinitas
+Moran.I(MORADASmoran$classfactor, ozone.dists.inv) #resultado
+
+#por exemplo, eliminar distâncias maiores que 15 km
+ozone.dists.bin <- (ozone.dists > 0 & ozone.dists <= 15000)
+Moran.I(MORADASmoran$classfactor, ozone.dists.bin) #Moran’s I =0.012, p = .001
+
+#o resultado (observed) é o valor de Moran's I, e quando é muito próximo de zero, pode-se afirmar (com p=...) que não há um padrão espacial, o que sugere uma distribuição aleatória no espaço. Se fosse próximo de 1 ou -1, teria um padrão na dist espacial.
+```
+
 
 #Operações geoespaciais
 Usar a library sf - spatial features, e trabalhar com shapefiles  

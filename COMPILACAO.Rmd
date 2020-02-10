@@ -745,7 +745,7 @@ library(ggplot2)
 library(wesanderson)
 ```
 ###Barras verticais
-```{r plot barras h, echo=T, fig.width=9}
+```{r plot barras v, echo=T, fig.width=9}
 #vertical, legendas a 45º, por categoria - MESSY
 ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN, fill = Category)) +
   geom_bar(stat="identity") +geom_text(aes(label=ENshort), size=5, hjust = -0.05, angle =45, vjust=-0.3)  +
@@ -810,9 +810,20 @@ ggplot(data=subset(TComb2,(Freq>2 & Freq<100)), aes(x=reorder(Var1,Freq), y=Freq
 ggsave("TMode_Alternative_freq.png", width = 8.5, height = 11, dpi=300)
 
 ```
+####Stacked
+```{r plot barras v stakednon100, echo=T}
+#gráfico barras verticais com dois valores, e x como factor
+ggplot(VIAGENSamlGAMA, aes(gama, viagens/1000, fill=inter) ) +  geom_bar(stat="identity")+
+  theme_classic()+
+  labs(title="Viagens AML",
+       subtitle="Número de viagens por gamas de distâncias",
+       x="Gama de distâncias [km]",
+       y="x1000 viagens")
+
+```
 
 ###Barras horizontais 
-```{r plot barras v, echo=TRUE}
+```{r plot barras h, echo=TRUE}
 #barras na horixontal
 ggplot(CONTAGENSzonasMT, aes(x=reorder(Names,SumFluxos), y=SumFluxos, fill=factor(AnoMT, levels=c("2018 Tarde", "2018 Manhã","2017 Tarde", "2017 Manhã")))) +
   geom_bar(stat="identity", position="dodge") + guides(fill=guide_legend(reverse=TRUE), colour=guide_legend(reverse=TRUE)) +
@@ -1476,6 +1487,35 @@ for (i in 5:20) {
   print(hoslem.test(MODEL05$CHANGE, fitted(logit05_2simples), g=i)$p.value)
 }
 ```
+
+###Moran's I autocorrelação espacial  
+ver mais [aqui](https://stats.idre.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/)  
+```{r gof Morans I, eval=F}
+library(ape)
+#ele não gosta de factores ordenados, de zeros, ou de distâncias infinitas
+str(MORADAS)
+MORADAS$classfactor<-as.numeric(MORADAS$CLASS) #tirar os factores ordenados com que vinha
+MORADAS$classfactor<-factor(MORADAS$classfactor)
+
+MORADASmoran<-MORADAS
+MORADASmoran$geometry<-NULL #tirar a geometria
+MORADASmoran<-na.omit(MORADASmoran) #tirar os NA
+MORADASmoran<-MORADASmoran[MORADASmoran$Orig_Lat!=0,] #tirar os zeros
+
+#criar a matrix de distâncias, a partide dos valores de Lat e Long
+ozone.dists <- as.matrix(dist(cbind(MORADASmoran$Orig_Long, MORADASmoran$Orig_Lat)))
+ozone.dists.inv <- 1/ozone.dists
+diag(ozone.dists.inv) <- 0
+ozone.dists.inv[is.infinite(ozone.dists.inv)] <- 0 #remover distâncias infinitas
+Moran.I(MORADASmoran$classfactor, ozone.dists.inv) #resultado
+
+#por exemplo, eliminar distâncias maiores que 15 km
+ozone.dists.bin <- (ozone.dists > 0 & ozone.dists <= 15000)
+Moran.I(MORADASmoran$classfactor, ozone.dists.bin) #Moran’s I =0.012, p = .001
+
+#o resultado (observed) é o valor de Moran's I, e quando é muito próximo de zero, pode-se afirmar (com p=...) que não há um padrão espacial, o que sugere uma distribuição aleatória no espaço. Se fosse próximo de 1 ou -1, teria um padrão na dist espacial.
+```
+
 
 #Operações geoespaciais
 Usar a library sf - spatial features, e trabalhar com shapefiles  
