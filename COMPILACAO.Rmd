@@ -193,6 +193,16 @@ require(devtools)
 install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.org")
 ```
 
+##Shortcuts
+* Correr linha/seleccão - `crtl`+`enter`
+* Setinha `<-` - `crtl`+`alt`+`-`  
+* Pipes `%>%` - `crtl`+`shift`+`m`  
+* Inserir chunks - `crtl`+`alt`+`i` 
+* Knit - `crtl`+`shift`+`k`
+* Restart R - `crtl`+`shift`+`F10`  
+* Quit R - `crtl`+`q`  
+ 
+> _Pode não funcionar em Mac_
 
 ##Definição do ambiente de trabalho
 Isto permite que não se tenha de estar sempre a escrever o caminho completo do ficheiro a abrir ou a guardar (outputs).  
@@ -200,6 +210,7 @@ Definir no início da sessão.
 ```{r set workspace, eval=F}
 setwd("D:/GIS/Rosix")
 ```
+ou `crtl`+`shift`+`h`  
 
 ##Importar tabelas
 ```{r import tables, eval=F}
@@ -401,6 +412,9 @@ ALOJAMENTO<-separate(ALOJAMENTO, ID_aloj, into=c("IDa", "ID1"), sep="F1_", remov
 ```{r change variable, eval=F}
 TABELA$IDADE<-as.numeric(TABELA$IDADE)
 TABELA$IDADE<-as.character(TABELA$IDADE)
+
+#Bonverter várias variáveis ao mesmo tempo
+BioGeme[,c(7,9:13,24:28,33:35,38:40)] <- as.integer(unlist(BioGeme[,c(7,9:13,24:28,33:35,38:40)])) #binárias para inteiros - útil para biogeme
 
 #Converter campo de data para sistema POSIX, extrair ano, mês, etc para colunas separadas
 Taxis$DataSTi <-as.POSIXlt(Taxis$DataHora, format="%Y/%m/%d %H:%M:%S")

@@ -353,14 +353,33 @@ library(fastDummies) #criar variáveis dummy a partir de categóricas</code></pr
 require(devtools)
 install_version(&quot;stplanr&quot;, version = &quot;0.3.1&quot;, repos = &quot;http://cran.us.r-project.org&quot;)</code></pre>
 </div>
+<div id="shortcuts" class="section level2">
+<h2><span class="header-section-number">1.2</span> Shortcuts</h2>
+<ul>
+<li>Correr linha/seleccão - <code>crtl</code>+<code>enter</code></li>
+<li>Setinha <code>&lt;-</code> - <code>crtl</code>+<code>alt</code>+<code>-</code><br />
+</li>
+<li>Pipes <code>%&gt;%</code> - <code>crtl</code>+<code>shift</code>+<code>m</code><br />
+</li>
+<li>Inserir chunks - <code>crtl</code>+<code>alt</code>+<code>i</code></li>
+<li>Knit - <code>crtl</code>+<code>shift</code>+<code>k</code></li>
+<li>Restart R - <code>crtl</code>+<code>shift</code>+<code>F10</code><br />
+</li>
+<li>Quit R - <code>crtl</code>+<code>q</code></li>
+</ul>
+<blockquote>
+<p><em>Pode não funcionar em Mac</em></p>
+</blockquote>
+</div>
 <div id="definição-do-ambiente-de-trabalho" class="section level2">
-<h2><span class="header-section-number">1.2</span> Definição do ambiente de trabalho</h2>
+<h2><span class="header-section-number">1.3</span> Definição do ambiente de trabalho</h2>
 <p>Isto permite que não se tenha de estar sempre a escrever o caminho completo do ficheiro a abrir ou a guardar (outputs).<br />
 Definir no início da sessão.</p>
 <pre class="r"><code>setwd(&quot;D:/GIS/Rosix&quot;)</code></pre>
+<p>ou <code>crtl</code>+<code>shift</code>+<code>h</code></p>
 </div>
 <div id="importar-tabelas" class="section level2">
-<h2><span class="header-section-number">1.3</span> Importar tabelas</h2>
+<h2><span class="header-section-number">1.4</span> Importar tabelas</h2>
 <pre class="r"><code>#importar tabela em formato nativo R
 readRDS(TABELA, &quot;D:/R/Tabela.Rds&quot;)
 
@@ -393,7 +412,7 @@ write.table(lisbon,&quot;D:\\rosa\\Dropbox\\MIT\\Inquerito Lisboa\\GIS\\missing_
 rm(files)</code></pre>
 </div>
 <div id="chamar-tabelas" class="section level2">
-<h2><span class="header-section-number">1.4</span> Chamar tabelas</h2>
+<h2><span class="header-section-number">1.5</span> Chamar tabelas</h2>
 <p>Uma tabela tem sempre linhas e colunas.</p>
 <ul>
 <li>Para chamar a tabela, deve-se referir ao nome dela <code>TABELA</code><br />
@@ -437,7 +456,7 @@ rm(files)</code></pre>
 </blockquote>
 </div>
 <div id="ler-e-alterar-colunas" class="section level2">
-<h2><span class="header-section-number">1.5</span> Ler e alterar colunas</h2>
+<h2><span class="header-section-number">1.6</span> Ler e alterar colunas</h2>
 <pre class="r"><code>#listar todas as colunas da tabela
 colnames(TABELA)
 
@@ -536,7 +555,7 @@ rm(CBARRIERS,NMOTIVATORS) #mais do que uma
 attach(TABELA)
 detach(TABELA) #reverter</code></pre>
 <div id="concatenate-e-seprate" class="section level3">
-<h3><span class="header-section-number">1.5.1</span> Concatenate e seprate</h3>
+<h3><span class="header-section-number">1.6.1</span> Concatenate e seprate</h3>
 <pre class="r"><code>#juntar variáveis numa só
 TABELA$coordenadas&lt;-paste(&quot;POINT(&quot;,TABELA$Longitude,&quot; &quot;,TABELA$Latitude,&quot;)&quot;)
 TABELA$gorila&lt;-paste(&quot;go&quot;,&quot;ri&quot;,&quot;la&quot;, sep = &quot;_&quot;) #go_ri_la
@@ -548,9 +567,12 @@ ALOJAMENTO&lt;-separate(ALOJAMENTO, ID_aloj, into=c(&quot;IDa&quot;, &quot;ID1&q
 #separa a variável ID_aloj em duas (dar os nomes), segundo um padrão, remover a variável original por default</code></pre>
 </div>
 <div id="mudar-o-tipo-de-variável" class="section level3">
-<h3><span class="header-section-number">1.5.2</span> Mudar o tipo de variável</h3>
+<h3><span class="header-section-number">1.6.2</span> Mudar o tipo de variável</h3>
 <pre class="r"><code>TABELA$IDADE&lt;-as.numeric(TABELA$IDADE)
 TABELA$IDADE&lt;-as.character(TABELA$IDADE)
+
+#Bonverter várias variáveis ao mesmo tempo
+BioGeme[,c(7,9:13,24:28,33:35,38:40)] &lt;- as.integer(unlist(BioGeme[,c(7,9:13,24:28,33:35,38:40)])) #binárias para inteiros - útil para biogeme
 
 #Converter campo de data para sistema POSIX, extrair ano, mês, etc para colunas separadas
 Taxis$DataSTi &lt;-as.POSIXlt(Taxis$DataHora, format=&quot;%Y/%m/%d %H:%M:%S&quot;)
@@ -566,7 +588,7 @@ Taxis$DataHora2016&lt;-paste(Taxis$Data2016,Taxis$Hora2016, sep = &quot; &quot;)
 Taxis$DataHora2016&lt;-as.POSIXct(Taxis$DataHora2016, format=&quot;%Y-%m-%d %H:%M:%S&quot;)</code></pre>
 </div>
 <div id="criar-tabela-com-data-sequencial-por-dia-ou-hora" class="section level3">
-<h3><span class="header-section-number">1.5.3</span> Criar tabela com data sequencial, por dia ou hora</h3>
+<h3><span class="header-section-number">1.6.3</span> Criar tabela com data sequencial, por dia ou hora</h3>
 <pre class="r"><code>#Cria uma tabela com todas as horas do ano de 2016
 Horas2016&lt;-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,23), by=&quot;hour&quot;)) #é aqui que podes trocar por dia ou minuto</code></pre>
 <blockquote>
@@ -575,7 +597,7 @@ Horas2016&lt;-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,2
 </div>
 </div>
 <div id="group-by-summarize-e-melt" class="section level2">
-<h2><span class="header-section-number">1.6</span> Group by, summarize e melt</h2>
+<h2><span class="header-section-number">1.7</span> Group by, summarize e melt</h2>
 <p>Calcula as médias e freq, de uma variável</p>
 <pre class="r"><code>#média
 groupmean&lt;-group_by(MCBARRIERSERA,ERA)
@@ -591,14 +613,14 @@ ODsViagesStatistics&lt;-summarise(v, cont=n(), min(DuracaoMinutos), max(DuracaoM
 ODsViagens&lt;-group_by(VIAGENSredux, Tipo, ID0, ID1)
 ODsViagens&lt;-summarise(ODsViagens,sum(DistanciaM), n())</code></pre>
 <div id="melt---dissolve-as-colunas-em-várias-linhas-repetidas" class="section level3">
-<h3><span class="header-section-number">1.6.1</span> Melt - dissolve as colunas em várias linhas repetidas</h3>
+<h3><span class="header-section-number">1.7.1</span> Melt - dissolve as colunas em várias linhas repetidas</h3>
 <pre class="r"><code>MCBARRIERSERAmelt &lt;- melt(MCBARRIERSERA, id.vars=c(&quot;names&quot;,&quot;MCBARRIERSERA.MEAN&quot;, &quot;MCBARRIERSERA.FREQ&quot;))</code></pre>
 </div>
 </div>
 <div id="variáveis-categóricas" class="section level2">
-<h2><span class="header-section-number">1.7</span> Variáveis categóricas</h2>
+<h2><span class="header-section-number">1.8</span> Variáveis categóricas</h2>
 <div id="factors-e-levels" class="section level3">
-<h3><span class="header-section-number">1.7.1</span> Factors e levels</h3>
+<h3><span class="header-section-number">1.8.1</span> Factors e levels</h3>
 <pre class="r"><code>#Criar factors e levels
 TODOS$Gender&lt;-factor(TODOS$Gender)
 TODOS$Gender&lt;-factor(TODOS$Gender, levels = c(&quot;Male&quot;, &quot;Female&quot;, &quot;Other&quot;)) #definir logo a ordem
@@ -630,7 +652,7 @@ TODOS$CHANGE_Class3 &lt;- ordered(TODOS$CHANGE_Class3, levels = c(&quot;Pessimis
 </div>
 </div>
 <div id="operações-nas-tabelas-ou-matrizes" class="section level2">
-<h2><span class="header-section-number">1.8</span> Operações nas tabelas ou matrizes</h2>
+<h2><span class="header-section-number">1.9</span> Operações nas tabelas ou matrizes</h2>
 <pre class="r"><code>#Somar colunas
 CTRIGGERS$SomaPontos &lt;- rowSums(CTRIGGERS[,c(146:193,196)])
 
@@ -667,7 +689,7 @@ na.omit(TABELA)
 MCTRIGGERS &lt;- CTRIGGERS[,c(146:193,196)]/CTRIGGERS$SomaPontos</code></pre>
 </div>
 <div id="gravar-outputs" class="section level2">
-<h2><span class="header-section-number">1.9</span> Gravar outputs</h2>
+<h2><span class="header-section-number">1.10</span> Gravar outputs</h2>
 <pre class="r"><code>#gravar tabela em ficheiro nativo R
 saveRDS(TABELA, &quot;Tabela.Rds&quot;)
 
