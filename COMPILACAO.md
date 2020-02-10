@@ -118,8 +118,8 @@ library(summarytools) #contínuas e categóricas
 library(fastDummies) #criar variáveis dummy a partir de categóricas
 ```
 
-```rlibrary
-#instalar uma versão específica de um package - útil para donwgrade
+```r
+#instalar uma versão específica de um package - útil para donwgrade  
 require(devtools)
 install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.org")
 ```
@@ -272,11 +272,17 @@ TABELA<-TABELA[is.na(TABELA$Modo0), -c(2,3,8:15)] #remover várias colunas segun
 
 #Extrair uma parte da tabela
 SubClustNC <-subset(SubNC, select=c(240,241))
+#ver também filtros abaixo...
 
-#reordenar tabela por variável
+#reordenar linhas, por variável
 TABELA <- TABELA[order(TABELA$ID_viagem),]
 TABELA <- TABELA[order(TABELA$Zona, TABELA$ID_viagem),] #por mais de uma variável
 TABELA <- TABELA[order(TABELA$Zona, -TABELA$ID_viagem),] #por mais de uma variável, com ordem decrescente na segunda
+
+#reodenar linhas, usando dyplr
+TABELA <-  arrange(TABELA, var1) #ascendente
+TABELA <-  arrange(TABELA, desc(var1)) #descendente, por 1 variável
+TABELA <-  arrange(TABELA, desc(var1, var2)) #por mais que 1 variável
 
 #adicionar um ID a cada linha, em ordem sequencial
 TABELA$ID<-seq.int(nrow(TABELA))
@@ -372,6 +378,18 @@ Horas2016<-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,23),
 ```
 >__Dica:__ explorar o [_lubridate_](https://github.com/rstudio/cheatsheets/raw/master/lubridate.pdf)
 
+##Pipes e filtros
+Outra maneira de pegar apenas numa parte da tabela, é usando filtros (uma função do [dyplr](https://dplyr.tidyverse.org/))
+
+```r
+filter(TABELA, var1=="Autocarro")
+filter(TABELA, var1!=var2) #selecciona os casos em que a var1 é diferente da var2
+TABELA %>% filter(var1!=var2) #usando pipes, omite-se o primeiro argumento
+```
+Pode-se usar infinitos pipes, e escrever só numa linha o código, evitando também criar dataframes intermédios.  
+  
+> cuidado com o summarise_at, pensar qual o o número do campo da tabela virtual criada.  
+
 ##Group by, summarize e melt
 Calcula as médias e freq, de uma variável
 
@@ -390,7 +408,15 @@ ODsViagesStatistics<-summarise(v, cont=n(), min(DuracaoMinutos), max(DuracaoMinu
 ODsViagens<-group_by(VIAGENSredux, Tipo, ID0, ID1)
 ODsViagens<-summarise(ODsViagens,sum(DistanciaM), n())
 ```
-###Melt - dissolve as colunas em várias linhas repetidas
+###Group by e summarize com pipes
+
+```r
+VIAGENSamlGAMA <- VIAGENSaml %>% group_by(inter, gama) %>% summarise(viagens = sum(PESOFIN), count=n())
+VIAGENSamlGAMAlisboa <- VIAGENSaml %>% filter(DTCC_or=="1106" | DTCC_de=="1106" )  %>% group_by(inter, gama) %>% summarise(viagens = sum(PESOFIN)) #filtrando apenas algumas
+```
+
+###Melt  
+Dissolve as colunas em várias linhas repetidas
 
 ```r
 MCBARRIERSERAmelt <- melt(MCBARRIERSERA, id.vars=c("names","MCBARRIERSERA.MEAN", "MCBARRIERSERA.FREQ"))

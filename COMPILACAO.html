@@ -349,7 +349,7 @@ library(ape) #para auto-correlações espaciais
 library(stargazer) #contínuas
 library(summarytools) #contínuas e categóricas
 library(fastDummies) #criar variáveis dummy a partir de categóricas</code></pre>
-<pre class="rlibrary"><code>#instalar uma versão específica de um package - útil para donwgrade
+<pre class="r"><code>#instalar uma versão específica de um package - útil para donwgrade  
 require(devtools)
 install_version(&quot;stplanr&quot;, version = &quot;0.3.1&quot;, repos = &quot;http://cran.us.r-project.org&quot;)</code></pre>
 </div>
@@ -501,11 +501,17 @@ TABELA&lt;-TABELA[is.na(TABELA$Modo0), -c(2,3,8:15)] #remover várias colunas se
 
 #Extrair uma parte da tabela
 SubClustNC &lt;-subset(SubNC, select=c(240,241))
+#ver também filtros abaixo...
 
-#reordenar tabela por variável
+#reordenar linhas, por variável
 TABELA &lt;- TABELA[order(TABELA$ID_viagem),]
 TABELA &lt;- TABELA[order(TABELA$Zona, TABELA$ID_viagem),] #por mais de uma variável
 TABELA &lt;- TABELA[order(TABELA$Zona, -TABELA$ID_viagem),] #por mais de uma variável, com ordem decrescente na segunda
+
+#reodenar linhas, usando dyplr
+TABELA &lt;-  arrange(TABELA, var1) #ascendente
+TABELA &lt;-  arrange(TABELA, desc(var1)) #descendente, por 1 variável
+TABELA &lt;-  arrange(TABELA, desc(var1, var2)) #por mais que 1 variável
 
 #adicionar um ID a cada linha, em ordem sequencial
 TABELA$ID&lt;-seq.int(nrow(TABELA))
@@ -596,8 +602,19 @@ Horas2016&lt;-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,2
 </blockquote>
 </div>
 </div>
+<div id="pipes-e-filtros" class="section level2">
+<h2><span class="header-section-number">1.7</span> Pipes e filtros</h2>
+<p>Outra maneira de pegar apenas numa parte da tabela, é usando filtros (uma função do <a href="https://dplyr.tidyverse.org/">dyplr</a>)</p>
+<pre class="r"><code>filter(TABELA, var1==&quot;Autocarro&quot;)
+filter(TABELA, var1!=var2) #selecciona os casos em que a var1 é diferente da var2
+TABELA %&gt;% filter(var1!=var2) #usando pipes, omite-se o primeiro argumento</code></pre>
+<p>Pode-se usar infinitos pipes, e escrever só numa linha o código, evitando também criar dataframes intermédios.</p>
+<blockquote>
+<p>cuidado com o summarise_at, pensar qual o o número do campo da tabela virtual criada.</p>
+</blockquote>
+</div>
 <div id="group-by-summarize-e-melt" class="section level2">
-<h2><span class="header-section-number">1.7</span> Group by, summarize e melt</h2>
+<h2><span class="header-section-number">1.8</span> Group by, summarize e melt</h2>
 <p>Calcula as médias e freq, de uma variável</p>
 <pre class="r"><code>#média
 groupmean&lt;-group_by(MCBARRIERSERA,ERA)
@@ -612,15 +629,21 @@ ODsViagesStatistics&lt;-summarise(v, cont=n(), min(DuracaoMinutos), max(DuracaoM
 
 ODsViagens&lt;-group_by(VIAGENSredux, Tipo, ID0, ID1)
 ODsViagens&lt;-summarise(ODsViagens,sum(DistanciaM), n())</code></pre>
-<div id="melt---dissolve-as-colunas-em-várias-linhas-repetidas" class="section level3">
-<h3><span class="header-section-number">1.7.1</span> Melt - dissolve as colunas em várias linhas repetidas</h3>
+<div id="group-by-e-summarize-com-pipes" class="section level3">
+<h3><span class="header-section-number">1.8.1</span> Group by e summarize com pipes</h3>
+<pre class="r"><code>VIAGENSamlGAMA &lt;- VIAGENSaml %&gt;% group_by(inter, gama) %&gt;% summarise(viagens = sum(PESOFIN), count=n())
+VIAGENSamlGAMAlisboa &lt;- VIAGENSaml %&gt;% filter(DTCC_or==&quot;1106&quot; | DTCC_de==&quot;1106&quot; )  %&gt;% group_by(inter, gama) %&gt;% summarise(viagens = sum(PESOFIN)) #filtrando apenas algumas</code></pre>
+</div>
+<div id="melt" class="section level3">
+<h3><span class="header-section-number">1.8.2</span> Melt</h3>
+<p>Dissolve as colunas em várias linhas repetidas</p>
 <pre class="r"><code>MCBARRIERSERAmelt &lt;- melt(MCBARRIERSERA, id.vars=c(&quot;names&quot;,&quot;MCBARRIERSERA.MEAN&quot;, &quot;MCBARRIERSERA.FREQ&quot;))</code></pre>
 </div>
 </div>
 <div id="variáveis-categóricas" class="section level2">
-<h2><span class="header-section-number">1.8</span> Variáveis categóricas</h2>
+<h2><span class="header-section-number">1.9</span> Variáveis categóricas</h2>
 <div id="factors-e-levels" class="section level3">
-<h3><span class="header-section-number">1.8.1</span> Factors e levels</h3>
+<h3><span class="header-section-number">1.9.1</span> Factors e levels</h3>
 <pre class="r"><code>#Criar factors e levels
 TODOS$Gender&lt;-factor(TODOS$Gender)
 TODOS$Gender&lt;-factor(TODOS$Gender, levels = c(&quot;Male&quot;, &quot;Female&quot;, &quot;Other&quot;)) #definir logo a ordem
@@ -652,7 +675,7 @@ TODOS$CHANGE_Class3 &lt;- ordered(TODOS$CHANGE_Class3, levels = c(&quot;Pessimis
 </div>
 </div>
 <div id="operações-nas-tabelas-ou-matrizes" class="section level2">
-<h2><span class="header-section-number">1.9</span> Operações nas tabelas ou matrizes</h2>
+<h2><span class="header-section-number">1.10</span> Operações nas tabelas ou matrizes</h2>
 <pre class="r"><code>#Somar colunas
 CTRIGGERS$SomaPontos &lt;- rowSums(CTRIGGERS[,c(146:193,196)])
 
@@ -689,7 +712,7 @@ na.omit(TABELA)
 MCTRIGGERS &lt;- CTRIGGERS[,c(146:193,196)]/CTRIGGERS$SomaPontos</code></pre>
 </div>
 <div id="gravar-outputs" class="section level2">
-<h2><span class="header-section-number">1.10</span> Gravar outputs</h2>
+<h2><span class="header-section-number">1.11</span> Gravar outputs</h2>
 <pre class="r"><code>#gravar tabela em ficheiro nativo R
 saveRDS(TABELA, &quot;Tabela.Rds&quot;)
 
