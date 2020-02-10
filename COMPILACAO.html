@@ -539,6 +539,9 @@ MCBARRIERS &lt;-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ) #assume as variáveis q
 MCBARRIERS &lt;-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ, by=c(&quot;nomeA&quot;=&quot;nomeB&quot;)) #declarar as variáveis que quero que faça o mach, em ambas as tabelas
 MCBARRIERS &lt;-right_join(MCBARRIERSMEAN,MCBARRIERSFREQ)
 
+#ficar com uma tabela com as linhas que não estão em ambas
+CP7not&lt;-anti_join(CP7CML, CP7, by = c(&quot;CP74&quot; = &quot;CP7&quot;)) #ver os que estavam na CML que ainda não tinhamos no nosso CP7
+
 #remover linhas exactamente iguais (duplicados)
 VIAGENS&lt;-unique(VIAGENS)
 VIAGENS&lt;-distinct(VIAGENS) #usa o tidyverse. pode-de declarar à frente quais as variáveis a inspeccionar
@@ -1826,6 +1829,12 @@ st_write(GridORD,&quot;D:\\GIS\\Pedro\\GRID_colunasCount.shp&quot;)
 st_write(TaxisORD,&quot;D:\\GIS\\Pedro\\TaxisViagens.shp&quot;)
 st_write(CicloviasActual,&quot;CicloviasActual.shp&quot;)
 
+#gravar 2 shapefiles de Origem e Destino, a partir de uma só tabela
+Origens&lt;- st_as_sf(Moradas,wkt = &quot;wkt&quot;, crs=4326)
+Destinos&lt;- st_as_sf(Moradas,wkt = &quot;wkttrabalho&quot;, crs=4326)
+st_write(Origens,&quot;Origens.shp&quot;)
+st_write(Destinos,&quot;Destinos.shp&quot;)
+
 #gravar csv, separado por TAB - MUITO MAIS LEVE, grava uma coluna com a geometria em formato WKT, e o ficheiro pode ser importato em qualquer SIG com esse campo de geometria
 write.table(GridORD,&quot;GridORD.txt&quot;,sep=&quot;\t&quot;,row.names=FALSE)
 write.table(TaxisORD,&quot;TaxisORD.txt&quot;,sep=&quot;\t&quot;,row.names=FALSE)</code></pre>
@@ -1862,20 +1871,47 @@ PontoD &lt;- st_as_sf(PontoD,coords = c(&quot;longitude&quot;, &quot;latitude&qu
 <div id="localizar-pontos-através-de-morada" class="section level3">
 <h3><span class="header-section-number">5.3.1</span> Localizar pontos, através de morada</h3>
 <p><em>Por completar</em> &gt;<strong>Dica</strong>: ver <a href="https://github.com/temospena/CP7">CP7</a> no github e juntar aos códigos postais com um <code>left_join</code></p>
+<p>Coordenadas a partir de um nome de rua ou POI</p>
+<pre class="r"><code>library(ggmap)
+register_google(key = &quot;YOUR_API_KEY_HERE&quot;)
+
+#especificar o país ou cidade, para limitar os resultados no google
+TRAna$CP7 #a lista de moradas sem lat/lon
+TRAna$cidade&lt;-&quot;Lisboa&quot;
+TRAna$morada&lt;-paste(TRAna$CP7,TRAna$cidade, sep = &quot;, &quot;)
+TRAna$lat &lt;- NA
+TRAna$lon &lt;- NA
+
+#ver no google maps o que inserir para que ele me encontre um único local
+
+#exemplos
+chelas &lt;- geocode(&quot;Metro Chelas&quot;)
+TRAna$lon[TRAna$morada==&quot;metro de Chelas, Lisboa&quot;]&lt;-chelas$lon
+TRAna$lat[TRAna$morada==&quot;metro de Chelas, Lisboa&quot;]&lt;-chelas$lat
+brasil &lt;- geocode(&quot;Avenida do Brasil, Lisbon&quot;)
+TRAna$lon[TRAna$morada==&quot;Av. Brasil, Lisboa&quot;]&lt;-brasil$lon
+TRAna$lat[TRAna$morada==&quot;Av. Brasil, Lisboa&quot;]&lt;-brasil$lat
+maternidade &lt;- geocode(&quot;Maternidade Alfredo Costa, Lisbon&quot;)
+TRAna$lon[TRAna$morada==&quot;Sao Sebastiao &amp; Av 5 Outubro, Lisboa&quot;]&lt;-maternidade$lon
+TRAna$lat[TRAna$morada==&quot;Sao Sebastiao &amp; Av 5 Outubro, Lisboa&quot;]&lt;-maternidade$lat
+catolica &lt;- geocode(&quot;Universidade Católica Portuguesa, Lisboa&quot;)
+TRAna$lon[TRAna$morada==&quot;Universidade Catolica, Lisboa&quot;]&lt;-catolica$lon
+TRAna$lat[TRAna$morada==&quot;Universidade Catolica, Lisboa&quot;]&lt;-catolica$lat
+
+rm(chelas,brasil,maternidade,catolica)
+
+#quando temos as coordenadas de Lisboa genéricas (-9.1393366, 38.7222524)
+lisboagen&lt;-geocode(&quot;Lisboa&quot;)#seleccionar aqueles que têm o Lisboa genérico
+TRAnaLX&lt;-TRAna[TRAna$lon==lisboagen$lon,]</code></pre>
 </div>
 <div id="calcular-percursos-ou-distâncias-e-tempos-por-determinado-modo-de-transporte" class="section level3">
 <h3><span class="header-section-number">5.3.2</span> Calcular percursos ou distâncias e tempos, por determinado modo de transporte</h3>
-<pre class="r"><code>#pelo openrouteservice - tem cycling
-lista1&lt;-list(c(38.74684,-9.150085),
-             c(38.74626,-9.143990),
-             c(38.75649,9.137337))
-x &lt;- ors_directions(lista1,profile=&quot;cycling-regular&quot;, preference=&quot;fastest&quot;)
-res &lt;- ors_matrix(lista1,profile=&quot;driving-car&quot;, resolve_locations=T, optimized=T, metrics = &quot;distance&quot;, units = &quot;km&quot;)
-
-#pelo google maps - tem transit, mas não calcula propriamente o percurso
+<pre class="r"><code>#pelo google maps - tem transit, mas não calcula propriamente o percurso
 library(gmapsdistance)
 set.api.key(&quot;YOUR_GoogleAPI_KEY&quot;)
+
 ODsGIRAcoord$origin&lt;-paste(ODsGIRAcoord$Latitude,ODsGIRAcoord$Longitude, sep=&quot;+&quot;) #tem de estar separado por +
+
 start_time &lt;- Sys.time()
 resulttransitponta &lt;- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        destination = ODsGIRAcoord$destination,
@@ -1885,12 +1921,40 @@ resulttransitponta &lt;- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        dep_time = &quot;08:45:00&quot;)) #por transportes públicos em hora de ponta
 end_time &lt;- Sys.time()
 end_time - start_time #para ver quanto tempo demorou
+
+table(resulttransitponta$Status.status) #ver quantos não encontrou
+
 #resulta uma tabela com Tempo[s] e Distância[m]
+resulttransitponta&lt;-resulttransitponta[,c(3,6)]
+names(resulttransitponta)&lt;-c(&quot;TimeS_TP&quot;,&quot;DistM_TP&quot;)
+
 #mode= bicycling, walking, driving, transit (mas o bicycling não funciona em portugal)</code></pre>
+<div id="por-bicicleta" class="section level4">
+<h4><span class="header-section-number">5.3.2.1</span> Por bicicleta</h4>
+<p>O Google maps ainda não permite calcular ODs de bicicleta em Portugal</p>
+<pre class="r"><code>#pelo openrouteservice - tem cycling
+lista1&lt;-list(c(38.74684,-9.150085),
+             c(38.74626,-9.143990),
+             c(38.75649,9.137337))
+x &lt;- ors_directions(lista1,profile=&quot;cycling-regular&quot;, preference=&quot;fastest&quot;)
+res &lt;- ors_matrix(lista1,profile=&quot;driving-car&quot;, resolve_locations=T, optimized=T, metrics = &quot;distance&quot;, units = &quot;km&quot;)
+
+#quando se calcula no QGIS e vem uma shapefile
+##alerta para remover os que têm O=D quando se exporta a shp para correr o ORS tools no QGIS! vai bloquear nesses
+RouteBici&lt;-st_read(&quot;RouteBici.shp&quot;)
+#recalcular a distância
+RouteBici$DistM_Bike&lt;-round(as.numeric(st_length(RouteBici)))
+#meter o tempo em segundos
+RouteBici$TimeS_Bike&lt;-round(RouteBici$DURATION_H*60*60)
+#Ficar só com Tempo e Dist
+RouteBici&lt;-RouteBici[,c(7,10,9)]
+#deixar numa data frame
+RouteBici$geometry&lt;-NULL</code></pre>
 <blockquote>
 <p><strong>Dica</strong>: ver também o <a href="http://symbolixau.github.io/googleway/reference/google_directions.html%5D">package googleway</a><br />
 ver ainda o <a href="https://www.cyclestreets.net/api/">Cyclestreets package</a> para um grande detalhe de percursos de bicicleta</p>
 </blockquote>
+</div>
 </div>
 </div>
 <div id="cálculo-da-geometria" class="section level2">

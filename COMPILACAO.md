@@ -310,6 +310,9 @@ MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ) #assume as variáveis que 
 MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ, by=c("nomeA"="nomeB")) #declarar as variáveis que quero que faça o mach, em ambas as tabelas
 MCBARRIERS <-right_join(MCBARRIERSMEAN,MCBARRIERSFREQ)
 
+#ficar com uma tabela com as linhas que não estão em ambas
+CP7not<-anti_join(CP7CML, CP7, by = c("CP74" = "CP7")) #ver os que estavam na CML que ainda não tinhamos no nosso CP7
+
 #remover linhas exactamente iguais (duplicados)
 VIAGENS<-unique(VIAGENS)
 VIAGENS<-distinct(VIAGENS) #usa o tidyverse. pode-de declarar à frente quais as variáveis a inspeccionar
@@ -1738,6 +1741,12 @@ st_write(GridORD,"D:\\GIS\\Pedro\\GRID_colunasCount.shp")
 st_write(TaxisORD,"D:\\GIS\\Pedro\\TaxisViagens.shp")
 st_write(CicloviasActual,"CicloviasActual.shp")
 
+#gravar 2 shapefiles de Origem e Destino, a partir de uma só tabela
+Origens<- st_as_sf(Moradas,wkt = "wkt", crs=4326)
+Destinos<- st_as_sf(Moradas,wkt = "wkttrabalho", crs=4326)
+st_write(Origens,"Origens.shp")
+st_write(Destinos,"Destinos.shp")
+
 #gravar csv, separado por TAB - MUITO MAIS LEVE, grava uma coluna com a geometria em formato WKT, e o ficheiro pode ser importato em qualquer SIG com esse campo de geometria
 write.table(GridORD,"GridORD.txt",sep="\t",row.names=FALSE)
 write.table(TaxisORD,"TaxisORD.txt",sep="\t",row.names=FALSE)
@@ -1779,21 +1788,53 @@ PontoD <- st_as_sf(PontoD,coords = c("longitude", "latitude"), crs=4326)
 ###Localizar pontos, através de morada  
 _Por completar_ 
 >__Dica__: ver [CP7](https://github.com/temospena/CP7) no github e juntar aos códigos postais com um `left_join`
+  
+Coordenadas a partir de um nome de rua ou POI  
+
+```r
+library(ggmap)
+register_google(key = "YOUR_API_KEY_HERE")
+
+#especificar o país ou cidade, para limitar os resultados no google
+TRAna$CP7 #a lista de moradas sem lat/lon
+TRAna$cidade<-"Lisboa"
+TRAna$morada<-paste(TRAna$CP7,TRAna$cidade, sep = ", ")
+TRAna$lat <- NA
+TRAna$lon <- NA
+
+#ver no google maps o que inserir para que ele me encontre um único local
+
+#exemplos
+chelas <- geocode("Metro Chelas")
+TRAna$lon[TRAna$morada=="metro de Chelas, Lisboa"]<-chelas$lon
+TRAna$lat[TRAna$morada=="metro de Chelas, Lisboa"]<-chelas$lat
+brasil <- geocode("Avenida do Brasil, Lisbon")
+TRAna$lon[TRAna$morada=="Av. Brasil, Lisboa"]<-brasil$lon
+TRAna$lat[TRAna$morada=="Av. Brasil, Lisboa"]<-brasil$lat
+maternidade <- geocode("Maternidade Alfredo Costa, Lisbon")
+TRAna$lon[TRAna$morada=="Sao Sebastiao & Av 5 Outubro, Lisboa"]<-maternidade$lon
+TRAna$lat[TRAna$morada=="Sao Sebastiao & Av 5 Outubro, Lisboa"]<-maternidade$lat
+catolica <- geocode("Universidade Católica Portuguesa, Lisboa")
+TRAna$lon[TRAna$morada=="Universidade Catolica, Lisboa"]<-catolica$lon
+TRAna$lat[TRAna$morada=="Universidade Catolica, Lisboa"]<-catolica$lat
+
+rm(chelas,brasil,maternidade,catolica)
+
+#quando temos as coordenadas de Lisboa genéricas (-9.1393366, 38.7222524)
+lisboagen<-geocode("Lisboa")#seleccionar aqueles que têm o Lisboa genérico
+TRAnaLX<-TRAna[TRAna$lon==lisboagen$lon,]
+```
+
 
 ### Calcular percursos ou distâncias e tempos, por determinado modo de transporte
 
 ```r
-#pelo openrouteservice - tem cycling
-lista1<-list(c(38.74684,-9.150085),
-             c(38.74626,-9.143990),
-             c(38.75649,9.137337))
-x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
-res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
-
 #pelo google maps - tem transit, mas não calcula propriamente o percurso
 library(gmapsdistance)
 set.api.key("YOUR_GoogleAPI_KEY")
+
 ODsGIRAcoord$origin<-paste(ODsGIRAcoord$Latitude,ODsGIRAcoord$Longitude, sep="+") #tem de estar separado por +
+
 start_time <- Sys.time()
 resulttransitponta <- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        destination = ODsGIRAcoord$destination,
@@ -1803,9 +1844,39 @@ resulttransitponta <- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        dep_time = "08:45:00")) #por transportes públicos em hora de ponta
 end_time <- Sys.time()
 end_time - start_time #para ver quanto tempo demorou
+
+table(resulttransitponta$Status.status) #ver quantos não encontrou
+
 #resulta uma tabela com Tempo[s] e Distância[m]
+resulttransitponta<-resulttransitponta[,c(3,6)]
+names(resulttransitponta)<-c("TimeS_TP","DistM_TP")
+
 #mode= bicycling, walking, driving, transit (mas o bicycling não funciona em portugal)
 ```
+####Por bicicleta  
+O Google maps ainda não permite calcular ODs de bicicleta em Portugal  
+
+```r
+#pelo openrouteservice - tem cycling
+lista1<-list(c(38.74684,-9.150085),
+             c(38.74626,-9.143990),
+             c(38.75649,9.137337))
+x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
+res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
+
+#quando se calcula no QGIS e vem uma shapefile
+##alerta para remover os que têm O=D quando se exporta a shp para correr o ORS tools no QGIS! vai bloquear nesses
+RouteBici<-st_read("RouteBici.shp")
+#recalcular a distância
+RouteBici$DistM_Bike<-round(as.numeric(st_length(RouteBici)))
+#meter o tempo em segundos
+RouteBici$TimeS_Bike<-round(RouteBici$DURATION_H*60*60)
+#Ficar só com Tempo e Dist
+RouteBici<-RouteBici[,c(7,10,9)]
+#deixar numa data frame
+RouteBici$geometry<-NULL
+```
+
 >__Dica__: ver também o [package googleway](http://symbolixau.github.io/googleway/reference/google_directions.html])  
 > ver ainda o [Cyclestreets package](https://www.cyclestreets.net/api/) para um grande detalhe de percursos de bicicleta   
 
