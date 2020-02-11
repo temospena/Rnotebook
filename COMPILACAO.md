@@ -1,7 +1,7 @@
 ---
 title: Rosix R Notebook
 author: R Félix
-date: _December 12, 2019_
+date: _February 9, 2020_
 output:
   html_document:
     highlight: textmate
@@ -40,13 +40,13 @@ Este é um bloco de notas virtuais para mim mesma, que usa o [R](https://www.r-p
 É um trabalho em actualização constante, onde procuro adicionar chunks de código, em linguagem R, para que possa voltar a usar no futuro sem pesquisar muito.
 
 Aqui pretendo dividir em capítulos, tais como:  
-  1.  Scripts básicos de R, tais como libraries, importar tabelas, apagar linhas, ler colunas, mudar nomes de variáveis, gravar outputs  
-  2.  Estatísticas simples  
-  3.  Plotagem de gáficos  
-  4.  Modelação  
-  5.  Operações geoespaciais  
-  6.  Matrizes OD  
-  7.  Rotinas e funções  
+    1.  Scripts básicos de R, tais como libraries, importar tabelas, apagar linhas, ler colunas, mudar nomes de variáveis, gravar outputs  
+    2.  Estatísticas simples  
+    3.  Plotagem de gáficos 
+    4.  Modelação  
+    5.  Operações geoespaciais  
+    6.  Matrizes OD  
+    7.  Rotinas e funções  
 
 
 __VER [CHEATSHEET do Markdown](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)  para melhores resultados__
@@ -115,7 +115,25 @@ library(ape) #para auto-correlações espaciais
 #visualização de dados em tabelas limpas
 library(stargazer) #contínuas
 library(summarytools) #contínuas e categóricas
+library(fastDummies) #criar variáveis dummy a partir de categóricas
 ```
+
+```r
+#instalar uma versão específica de um package - útil para donwgrade  
+require(devtools)
+install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.org")
+```
+
+##Shortcuts
+* Correr linha/seleccão - `crtl`+`enter`
+* Setinha `<-` - `crtl`+`alt`+`-`  
+* Pipes `%>%` - `crtl`+`shift`+`m`  
+* Inserir chunks - `crtl`+`alt`+`i` 
+* Knit - `crtl`+`shift`+`k`
+* Restart R - `crtl`+`shift`+`F10`  
+* Quit R - `crtl`+`q`  
+ 
+> _Pode não funcionar em Mac_
 
 ##Definição do ambiente de trabalho
 Isto permite que não se tenha de estar sempre a escrever o caminho completo do ficheiro a abrir ou a guardar (outputs).  
@@ -124,6 +142,7 @@ Definir no início da sessão.
 ```r
 setwd("D:/GIS/Rosix")
 ```
+ou `crtl`+`shift`+`h`  
 
 ##Importar tabelas
 
@@ -253,11 +272,17 @@ TABELA<-TABELA[is.na(TABELA$Modo0), -c(2,3,8:15)] #remover várias colunas segun
 
 #Extrair uma parte da tabela
 SubClustNC <-subset(SubNC, select=c(240,241))
+#ver também filtros abaixo...
 
-#reordenar tabela por variável
+#reordenar linhas, por variável
 TABELA <- TABELA[order(TABELA$ID_viagem),]
 TABELA <- TABELA[order(TABELA$Zona, TABELA$ID_viagem),] #por mais de uma variável
 TABELA <- TABELA[order(TABELA$Zona, -TABELA$ID_viagem),] #por mais de uma variável, com ordem decrescente na segunda
+
+#reodenar linhas, usando dyplr
+TABELA <-  arrange(TABELA, var1) #ascendente
+TABELA <-  arrange(TABELA, desc(var1)) #descendente, por 1 variável
+TABELA <-  arrange(TABELA, desc(var1, var2)) #por mais que 1 variável
 
 #adicionar um ID a cada linha, em ordem sequencial
 TABELA$ID<-seq.int(nrow(TABELA))
@@ -280,9 +305,13 @@ MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by="ID", all.x=T, all.y=F)
 #fazer um merge por mais do que uma variável
 MCBARRIERS <-merge(MCBARRIERS.MEAN,MCBARRIERS.FREQ, by=c("ID","Type"), all.x=T, all.y=F)
 
-#fazer um merge usando o tydiverse - assume as variáveis iguais
-MCBARRIERS <-left_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
-MCBARRIERS <-right_join(MCBARRIERS.MEAN,MCBARRIERS.FREQ)
+#fazer um merge usando o tydiverse
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ) #assume as variáveis que têm o mesmo nome
+MCBARRIERS <-left_join(MCBARRIERSMEAN,MCBARRIERSFREQ, by=c("nomeA"="nomeB")) #declarar as variáveis que quero que faça o mach, em ambas as tabelas
+MCBARRIERS <-right_join(MCBARRIERSMEAN,MCBARRIERSFREQ)
+
+#ficar com uma tabela com as linhas que não estão em ambas
+CP7not<-anti_join(CP7CML, CP7, by = c("CP74" = "CP7")) #ver os que estavam na CML que ainda não tinhamos no nosso CP7
 
 #remover linhas exactamente iguais (duplicados)
 VIAGENS<-unique(VIAGENS)
@@ -306,11 +335,30 @@ rm(CBARRIERS,NMOTIVATORS) #mais do que uma
 attach(TABELA)
 detach(TABELA) #reverter
 ```
+
+###Concatenate e seprate  
+
+```r
+#juntar variáveis numa só
+TABELA$coordenadas<-paste("POINT(",TABELA$Longitude," ",TABELA$Latitude,")")
+TABELA$gorila<-paste("go","ri","la", sep = "_") #go_ri_la
+TABELA$gorila<-paste("go","ri","la", sep = "") #gorila
+TABELA$gorila<-paste0("go","ri","la") #gorila
+
+#separar variveis delimitadas por...
+ALOJAMENTO<-separate(ALOJAMENTO, ID_aloj, into=c("IDa", "ID1"), sep="F1_", remove = F)
+#separa a variável ID_aloj em duas (dar os nomes), segundo um padrão, remover a variável original por default
+```
+
+
 ###Mudar o tipo de variável
 
 ```r
 TABELA$IDADE<-as.numeric(TABELA$IDADE)
 TABELA$IDADE<-as.character(TABELA$IDADE)
+
+#Bonverter várias variáveis ao mesmo tempo
+BioGeme[,c(7,9:13,24:28,33:35,38:40)] <- as.integer(unlist(BioGeme[,c(7,9:13,24:28,33:35,38:40)])) #binárias para inteiros - útil para biogeme
 
 #Converter campo de data para sistema POSIX, extrair ano, mês, etc para colunas separadas
 Taxis$DataSTi <-as.POSIXlt(Taxis$DataHora, format="%Y/%m/%d %H:%M:%S")
@@ -333,6 +381,18 @@ Horas2016<-as.data.frame(seq.POSIXt(ISOdate(2016,1,1,0), ISOdate(2016,12,31,23),
 ```
 >__Dica:__ explorar o [_lubridate_](https://github.com/rstudio/cheatsheets/raw/master/lubridate.pdf)
 
+##Pipes e filtros
+Outra maneira de pegar apenas numa parte da tabela, é usando filtros (uma função do [dyplr](https://dplyr.tidyverse.org/))
+
+```r
+filter(TABELA, var1=="Autocarro")
+filter(TABELA, var1!=var2) #selecciona os casos em que a var1 é diferente da var2
+TABELA %>% filter(var1!=var2) #usando pipes, omite-se o primeiro argumento
+```
+Pode-se usar infinitos pipes, e escrever só numa linha o código, evitando também criar dataframes intermédios.  
+  
+> cuidado com o summarise_at, pensar qual o o número do campo da tabela virtual criada.  
+
 ##Group by, summarize e melt
 Calcula as médias e freq, de uma variável
 
@@ -351,7 +411,15 @@ ODsViagesStatistics<-summarise(v, cont=n(), min(DuracaoMinutos), max(DuracaoMinu
 ODsViagens<-group_by(VIAGENSredux, Tipo, ID0, ID1)
 ODsViagens<-summarise(ODsViagens,sum(DistanciaM), n())
 ```
-###Melt - dissolve as colunas em várias linhas repetidas
+###Group by e summarize com pipes
+
+```r
+VIAGENSamlGAMA <- VIAGENSaml %>% group_by(inter, gama) %>% summarise(viagens = sum(PESOFIN), count=n())
+VIAGENSamlGAMAlisboa <- VIAGENSaml %>% filter(DTCC_or=="1106" | DTCC_de=="1106" )  %>% group_by(inter, gama) %>% summarise(viagens = sum(PESOFIN)) #filtrando apenas algumas
+```
+
+###Melt  
+Dissolve as colunas em várias linhas repetidas
 
 ```r
 MCBARRIERSERAmelt <- melt(MCBARRIERSERA, id.vars=c("names","MCBARRIERSERA.MEAN", "MCBARRIERSERA.FREQ"))
@@ -457,13 +525,30 @@ write.csv(PERSONAL, "personal.csv")
 summary(TODOS$IDADE)
 ```
 
-###Chi quadrado
+##Chi quadrado
 
 ```r
 chisq.test(table(CANDNC$TYPE, CANDNC$Gender))
 ```
 
-###Correlações
+##T-test  
+Comparar duas variáveis. É mesmo superior? Inferior? Igual?
+
+```r
+#t.test(x, y = NULL, alternative = c("two.sided", "less", "greater"), mu = 0, 
+#       paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$SumCiclistas, c2017$SumCiclistas, alternative = "greater", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95) #paired - linha a linha
+
+t.test(c2018$Mulher/c2018$SumCiclistas, c2017$Mulher/c2017$SumCiclistas, alternative = "greater", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)
+
+t.test(c2018$CCapacete/c2018$SumCiclistas, c2017$CCapacete/c2017$SumCiclistas, alternative = "less", mu = 0, 
+       paired = T, var.equal = FALSE, conf.level = 0.95)
+```
+
+##Correlações
 
 ```r
 # Pearson
@@ -475,7 +560,7 @@ cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="kendall"
 cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="spearm", alternative = "g")
 cor.test(COMP_TrMot$MCTRIGGERS.MEAN,COMP_TrMot$MOTIVATORS.MEAN, method="spearm", alternative = "two.sided")
 ```
-
+  
 
 #Gráficos e plots
 __VER [CHEATSHEET do ggplot](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf) __  
@@ -692,7 +777,7 @@ ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN
   scale_fill_brewer(palette="Paired") +  coord_cartesian(xlim=c(0,39)) + ylim(NA, 0.16)
 ```
 
-![](README_figs/README-plot barras h-1.png)<!-- -->
+![](README_figs/README-plot barras v-1.png)<!-- -->
 
 ```r
 #barras com realce dos quartis nas legendas
@@ -705,7 +790,7 @@ ggplot(data=MCTRIGGERS, aes(x=reorder(names,-MCTRIGGERS.MEAN), y=MCTRIGGERS.MEAN
   scale_fill_manual(values = wes_palette("GrandBudapest1"), "Frequency of choices")  + coord_cartesian(xlim=c(0,45)) + ylim(NA, 0.14)
 ```
 
-![](README_figs/README-plot barras h-2.png)<!-- -->
+![](README_figs/README-plot barras v-2.png)<!-- -->
 
 ####Stacked 100%  
 
@@ -771,6 +856,19 @@ ggplot(data=subset(TComb2,(Freq>2 & Freq<100)), aes(x=reorder(Var1,Freq), y=Freq
   labs(title="Travel Mode alternative combinations", subtitle="Freq >2",x="Combinations")
 ggsave("TMode_Alternative_freq.png", width = 8.5, height = 11, dpi=300)
 ```
+####Stacked
+
+```r
+#gráfico barras verticais com dois valores, e x como factor
+ggplot(VIAGENSamlGAMA, aes(gama, viagens/1000, fill=inter) ) +  geom_bar(stat="identity")+
+  theme_classic()+
+  labs(title="Viagens AML",
+       subtitle="Número de viagens por gamas de distâncias",
+       x="Gama de distâncias [km]",
+       y="x1000 viagens")
+```
+
+![](README_figs/README-plot barras v stakednon100-1.png)<!-- -->
 
 ###Barras horizontais 
 
@@ -782,7 +880,7 @@ ggplot(CONTAGENSzonasMT, aes(x=reorder(Names,SumFluxos), y=SumFluxos, fill=facto
   coord_flip() + theme_minimal() + theme(legend.position = c(0.752, 0.305), legend.title = element_text(face="bold")) + labs(y="Pico de ciclistas por hora de ponta", x="Zonas")
 ```
 
-![](README_figs/README-plot barras v-1.png)<!-- -->
+![](README_figs/README-plot barras h-1.png)<!-- -->
 
 ```r
 #simplificado, com legendas nas barras
@@ -792,7 +890,7 @@ ggplot(CONTAGENSzonas, aes(x=reorder(Names,SumFluxos), y=SumFluxos4, fill=factor
   coord_flip() + theme_minimal() + labs(y="Média de ciclistas por hora de ponta", x="Zonas")
 ```
 
-![](README_figs/README-plot barras v-2.png)<!-- -->
+![](README_figs/README-plot barras h-2.png)<!-- -->
 
 ###Facets
 
@@ -854,6 +952,21 @@ ggplot(DF_summary, aes(B3types, CHANGE_Class3)) +
 ```
 
 ![](README_figs/README-plot bolas-1.png)<!-- -->
+Alterar cores e adicionar labels nas bolas  
+
+```r
+##criar coluna com a cor
+DF_summary$prob <- c("g","y","y","g","g","y","r","g","g") #green, yellow, red 
+ggplot(DF_summary, aes(B3types, CHANGE_Class3)) +
+  geom_point(aes(size=count, colour=factor(prob)))+scale_color_manual(values = c("#00BA38", "#F8766D","#619CFF")) +
+  geom_text(data=DF_summary[DF_summary$count>25,],aes(label = count), size=4) +
+  geom_text(data=DF_summary[DF_summary$count<25,],aes(label = count), hjust=-1,vjust=-1, size=4) + #para as bolas pequenas
+  scale_size(range = c(1, 30))   + theme(legend.position="none") +
+  labs(title = "Types of potential cyclists", x = "Stages of Change", y = "Change class")
+```
+
+![](README_figs/README-plot bolas labels-1.png)<!-- -->
+
   
 ##Gráficos de dispersão, com indicação da linha de tendência
 
@@ -1360,6 +1473,19 @@ table(DATAMZ$Municipality) #ver a proporção de Municipios
 mldata <- mlogit.data(DATAMZ, choice="CHOICE", shape="wide")
 #whether 'long' if each row is an alternative or 'wide' if each row is an observation
 ```
+De uma para várias variáveis dummy, usando o [fastDummies](https://github.com/jacobkap/fastDummies)  
+
+```r
+library(fastDummies)
+#Separar uma coluna (modo escolhido) em várias binárias
+Biogeme3725$CHOICE <- factor(Biogeme3725$MODOnovo, labels = c("Gerada","Pe","Bicicleta","Automovel","TP")) #mais vale criar o factor para depois ter logo o nome da var nas colunas novas
+
+Biogeme3725 <- dummy_columns(Biogeme3725, select_columns ="CHOICE", ignore_na=T) 
+#remove_first_dummy=T , se queremos ficar sem a primeia opção - útil no biogeme
+
+#às vezes pode haver diferenças para chr e num. ver vignete para mais opções
+```
+
 >__Dica:__ Ver mais opções de preparação das tabelas para modelação [aqui](https://www.rdocumentation.org/packages/mlogit/versions/1.0-1/topics/mlogit.data)
 
 ###Modelo DCM
@@ -1540,10 +1666,41 @@ for (i in 5:20) {
 }
 ```
 
+###Moran's I autocorrelação espacial  
+ver mais [aqui](https://stats.idre.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/)  
+
+```r
+library(ape)
+#ele não gosta de factores ordenados, de zeros, ou de distâncias infinitas
+str(MORADAS)
+MORADAS$classfactor<-as.numeric(MORADAS$CLASS) #tirar os factores ordenados com que vinha
+MORADAS$classfactor<-factor(MORADAS$classfactor)
+
+MORADASmoran<-MORADAS
+MORADASmoran$geometry<-NULL #tirar a geometria
+MORADASmoran<-na.omit(MORADASmoran) #tirar os NA
+MORADASmoran<-MORADASmoran[MORADASmoran$Orig_Lat!=0,] #tirar os zeros
+
+#criar a matrix de distâncias, a partide dos valores de Lat e Long
+ozone.dists <- as.matrix(dist(cbind(MORADASmoran$Orig_Long, MORADASmoran$Orig_Lat)))
+ozone.dists.inv <- 1/ozone.dists
+diag(ozone.dists.inv) <- 0
+ozone.dists.inv[is.infinite(ozone.dists.inv)] <- 0 #remover distâncias infinitas
+Moran.I(MORADASmoran$classfactor, ozone.dists.inv) #resultado
+
+#por exemplo, eliminar distâncias maiores que 15 km
+ozone.dists.bin <- (ozone.dists > 0 & ozone.dists <= 15000)
+Moran.I(MORADASmoran$classfactor, ozone.dists.bin) #Moran’s I =0.012, p = .001
+
+#o resultado (observed) é o valor de Moran's I, e quando é muito próximo de zero, pode-se afirmar (com p=...) que não há um padrão espacial, o que sugere uma distribuição aleatória no espaço. Se fosse próximo de 1 ou -1, teria um padrão na dist espacial.
+```
+
+
 #Operações geoespaciais
 Usar a library sf - spatial features, e trabalhar com shapefiles  
 
-##Importar shapefiles  
+##Importar, converter, gravar  
+###Importar shapefiles  
 
 ```r
 ODbike_250mRedeCiclavel2001<-st_read("D:/rosa/Dropbox/MIT/Inquerito Lisboa/GIS/ODbike_250mRedeCiclavel2001.shp")
@@ -1561,14 +1718,19 @@ Verificar se é um ficheiro apenas de dataframe ou se tem componente de geometri
 
 ```r
 class(ODbike_250mANOS)
+```
+###Converter DF para shp e shp para DF  
 
-#remover a componente de geomeria / passar de shapefile para tabela - dá jeito para algumas operações que não são possíveis com shapes como o merge
+```r
+#passar de shapefile para tabela
+#remover a componente de geomeria - dá jeito para algumas operações que não são possíveis com shapes como o merge
 ODbike_250mANOS$geometry<-NULL
 
 #transformar uma tabela em shapefile
 Flows<-st_as_sf(Flows,wkt = "geometry")
+Flows<-st_as_sf(Flows,wkt = "geometry", crs=4326) #determinar o crs directamente ali
 ```
-##Gravar shapefiles ou tsv
+###Gravar shapefiles ou tsv
 
 ```r
 #ver se é um sf (shapefile)
@@ -1578,6 +1740,12 @@ class(GridORD)
 st_write(GridORD,"D:\\GIS\\Pedro\\GRID_colunasCount.shp")
 st_write(TaxisORD,"D:\\GIS\\Pedro\\TaxisViagens.shp")
 st_write(CicloviasActual,"CicloviasActual.shp")
+
+#gravar 2 shapefiles de Origem e Destino, a partir de uma só tabela
+Origens<- st_as_sf(Moradas,wkt = "wkt", crs=4326)
+Destinos<- st_as_sf(Moradas,wkt = "wkttrabalho", crs=4326)
+st_write(Origens,"Origens.shp")
+st_write(Destinos,"Destinos.shp")
 
 #gravar csv, separado por TAB - MUITO MAIS LEVE, grava uma coluna com a geometria em formato WKT, e o ficheiro pode ser importato em qualquer SIG com esse campo de geometria
 write.table(GridORD,"GridORD.txt",sep="\t",row.names=FALSE)
@@ -1620,21 +1788,53 @@ PontoD <- st_as_sf(PontoD,coords = c("longitude", "latitude"), crs=4326)
 ###Localizar pontos, através de morada  
 _Por completar_ 
 >__Dica__: ver [CP7](https://github.com/temospena/CP7) no github e juntar aos códigos postais com um `left_join`
+  
+Coordenadas a partir de um nome de rua ou POI  
+
+```r
+library(ggmap)
+register_google(key = "YOUR_API_KEY_HERE")
+
+#especificar o país ou cidade, para limitar os resultados no google
+TRAna$CP7 #a lista de moradas sem lat/lon
+TRAna$cidade<-"Lisboa"
+TRAna$morada<-paste(TRAna$CP7,TRAna$cidade, sep = ", ")
+TRAna$lat <- NA
+TRAna$lon <- NA
+
+#ver no google maps o que inserir para que ele me encontre um único local
+
+#exemplos
+chelas <- geocode("Metro Chelas")
+TRAna$lon[TRAna$morada=="metro de Chelas, Lisboa"]<-chelas$lon
+TRAna$lat[TRAna$morada=="metro de Chelas, Lisboa"]<-chelas$lat
+brasil <- geocode("Avenida do Brasil, Lisbon")
+TRAna$lon[TRAna$morada=="Av. Brasil, Lisboa"]<-brasil$lon
+TRAna$lat[TRAna$morada=="Av. Brasil, Lisboa"]<-brasil$lat
+maternidade <- geocode("Maternidade Alfredo Costa, Lisbon")
+TRAna$lon[TRAna$morada=="Sao Sebastiao & Av 5 Outubro, Lisboa"]<-maternidade$lon
+TRAna$lat[TRAna$morada=="Sao Sebastiao & Av 5 Outubro, Lisboa"]<-maternidade$lat
+catolica <- geocode("Universidade Católica Portuguesa, Lisboa")
+TRAna$lon[TRAna$morada=="Universidade Catolica, Lisboa"]<-catolica$lon
+TRAna$lat[TRAna$morada=="Universidade Catolica, Lisboa"]<-catolica$lat
+
+rm(chelas,brasil,maternidade,catolica)
+
+#quando temos as coordenadas de Lisboa genéricas (-9.1393366, 38.7222524)
+lisboagen<-geocode("Lisboa")#seleccionar aqueles que têm o Lisboa genérico
+TRAnaLX<-TRAna[TRAna$lon==lisboagen$lon,]
+```
+
 
 ### Calcular percursos ou distâncias e tempos, por determinado modo de transporte
 
 ```r
-#pelo openrouteservice - tem cycling
-lista1<-list(c(38.74684,-9.150085),
-             c(38.74626,-9.143990),
-             c(38.75649,9.137337))
-x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
-res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
-
 #pelo google maps - tem transit, mas não calcula propriamente o percurso
 library(gmapsdistance)
 set.api.key("YOUR_GoogleAPI_KEY")
+
 ODsGIRAcoord$origin<-paste(ODsGIRAcoord$Latitude,ODsGIRAcoord$Longitude, sep="+") #tem de estar separado por +
+
 start_time <- Sys.time()
 resulttransitponta <- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        destination = ODsGIRAcoord$destination,
@@ -1644,9 +1844,39 @@ resulttransitponta <- as.data.frame(gmapsdistance(origin=ODsGIRAcoord$origin,
                                        dep_time = "08:45:00")) #por transportes públicos em hora de ponta
 end_time <- Sys.time()
 end_time - start_time #para ver quanto tempo demorou
+
+table(resulttransitponta$Status.status) #ver quantos não encontrou
+
 #resulta uma tabela com Tempo[s] e Distância[m]
+resulttransitponta<-resulttransitponta[,c(3,6)]
+names(resulttransitponta)<-c("TimeS_TP","DistM_TP")
+
 #mode= bicycling, walking, driving, transit (mas o bicycling não funciona em portugal)
 ```
+####Por bicicleta  
+O Google maps ainda não permite calcular ODs de bicicleta em Portugal  
+
+```r
+#pelo openrouteservice - tem cycling
+lista1<-list(c(38.74684,-9.150085),
+             c(38.74626,-9.143990),
+             c(38.75649,9.137337))
+x <- ors_directions(lista1,profile="cycling-regular", preference="fastest")
+res <- ors_matrix(lista1,profile="driving-car", resolve_locations=T, optimized=T, metrics = "distance", units = "km")
+
+#quando se calcula no QGIS e vem uma shapefile
+##alerta para remover os que têm O=D quando se exporta a shp para correr o ORS tools no QGIS! vai bloquear nesses
+RouteBici<-st_read("RouteBici.shp")
+#recalcular a distância
+RouteBici$DistM_Bike<-round(as.numeric(st_length(RouteBici)))
+#meter o tempo em segundos
+RouteBici$TimeS_Bike<-round(RouteBici$DURATION_H*60*60)
+#Ficar só com Tempo e Dist
+RouteBici<-RouteBici[,c(7,10,9)]
+#deixar numa data frame
+RouteBici$geometry<-NULL
+```
+
 >__Dica__: ver também o [package googleway](http://symbolixau.github.io/googleway/reference/google_directions.html])  
 > ver ainda o [Cyclestreets package](https://www.cyclestreets.net/api/) para um grande detalhe de percursos de bicicleta   
 
@@ -1666,7 +1896,7 @@ st_write(Taxis,"D:\\GIS\\Pedro\\Pontos Taxi Alterados/PontosTaxi.shp") #gravar n
 ```
 
 ###Conversão em WKT
-Well Known Text: ver [wiki]()
+Well Known Text: ver [wiki](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
 
 ```r
 #colar os campos Lat e Long em wkt, neste caso pontos
@@ -1907,6 +2137,7 @@ st_distance(coordinates)
 ```
 
 ##Desire lines pelo stplanar
+ver @stplanr
 
 ```r
 #Viagens
@@ -1953,6 +2184,10 @@ plot(rnetD, lwd = lwd)
 ```
 
 ![](README_figs/README-stplanr agregate-1.png)<!-- -->
+
+```r
+#só está a funcionar com a versão 0.3.1
+```
 
 ###Plotar em mapa interactivo, com o leaflet
 

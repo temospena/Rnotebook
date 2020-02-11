@@ -1,4 +1,8 @@
 *.txt
 *.Rproj.user
 *.Rproj.user/*
+*.Rproj.user\*
 *.Rhistory
+.Rhistory
+.Rproj.user/shared/notebooks/paths
+.Rproj.user/4F4D6E2C/console06/INDEX001
