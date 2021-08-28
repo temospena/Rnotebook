@@ -197,7 +197,10 @@ install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.
 * Correr linha/seleccão - `crtl`+`enter`
 * Setinha `<-` - `crtl`+`alt`+`-`  
 * Pipes `%>%` - `crtl`+`shift`+`m`  
+* Transformar em comentário `#` - `crtl`+`shift`+`c`  
+* Alinhar código - `crtl`+`shift`+`a`  
 * Inserir chunks - `crtl`+`alt`+`i` 
+* Inserir secção - `crtl`+`shift`+`r``
 * Knit - `crtl`+`shift`+`k`
 * Restart R - `crtl`+`shift`+`F10`  
 * Quit R - `crtl`+`q`  
@@ -1123,7 +1126,7 @@ pal[ceiling(numlevels/2)]<-"#DFDFDF"
 legend.pal<-pal
 pal<-c(pal[1:(ceiling(numlevels/2)-1)], pal[ceiling(numlevels/2)], 
        pal[ceiling(numlevels/2)], pal[(ceiling(numlevels/2)+1):(numlevels-1)])
-tab3<-melt(tab2,id="outcome")
+tab3<-melt(tab2,id="outcome") #actualizar para pivot_longer
 tab3$col<-rep(pal,each=temp.rows)
 tab3$value<-tab3$value*100
 tab3$outcome<-str_wrap(tab3$outcome, width = 40)
@@ -1214,12 +1217,13 @@ Exemplos
 
 library(likert)
 Resultyy3 = likert(Personalityyy3)
-plot(Resultyy3, type="bar",centered=F)+ggtitle("Cyclists")
+plot(Resultyy3, type = "bar", centered = F) + ggtitle("Cyclists")
+
 ```
 ```{r plot likert3, echo=T, fig.height=9, fig.width=6, message=FALSE, warning=FALSE}
 ResultyG_1 <- likert(Personalityyy[c(1:6)], grouping=Personalityyy$CHANGE_Class3)
 ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$results[,1])
-plot(ResultyGs_1, type="bar", centered=FALSE)
+# plot(ResultyGs_1, type="bar", centered=FALSE) # resolver!
 ```
 
 
@@ -1284,15 +1288,25 @@ library(corrplot)
 library(ggcorrplot)
 ```
 ```{r corr plot, echo=T}
-res<-cor(PERSONALITY[c(1:18)], method = "spearman", use = "complete.obs")
+# res<-cor(PERSONALITY[c(1:18)], method = "spearman", use = "complete.obs")
 #round(res,2)
-res2 <- rcorr(as.matrix(PERSONALITY[c(1:18)],method = "spearman", use = "complete.obs")) #agora com p-values
 
-corrplot(res, p.mat = res2$P, type = "upper", order = "FPC", method = "color",
-         insig = "pch", pch.cex = .9,tl.col = "black")
+res2 <- rcorr(as.matrix(PERSONALITY[c(1:18)], type = "spearman")) #agora com p-values
+# corrplot(
+#   corr = res2$r,
+#   p.mat = res2$P,
+#   type = "upper",
+#   order = "FPC",
+#   method = "color",
+#   insig = "pch",
+#   sig.level = 1 - 0.95,
+#   pch.cex = .9,
+#   tl.col = "black",
+#   # is.corr = TRUE
+# )
 
 col<- colorRampPalette(c("blue", "white", "red"))(20)
-heatmap(x = res, col = col, symm = TRUE)
+heatmap(x = res2$r, col = col, symm = TRUE)
 ```
 
 
@@ -2018,6 +2032,7 @@ Usar o [stplanr](https://docs.ropensci.org/stplanr/reference/overline2.html) par
 ```{r stplanr agregate, eval=T, echo=T, fig.height=4, fig.width=5, message=FALSE, warning=FALSE}
 #tendo calculado as rotas de bicicleta de casa dos alunos até à escola D, no QGIS
 library(stplanr)
+library(sf)
 sl = RouteD[RouteD$DIST_KM>0.5 & RouteD$DIST_KM<4 ,] #filtrar só aqueles a mais de 500m e menos de 4km
 sl$alunos = 1 #cada route tem 1 aluno a fazer (para depois agregar)
 rnetD = overline2(sl, "alunos") #partir as rotas em segmentos e somá-los

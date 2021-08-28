@@ -128,7 +128,9 @@ install_version("stplanr", version = "0.3.1", repos = "http://cran.us.r-project.
 * Correr linha/seleccão - `crtl`+`enter`
 * Setinha `<-` - `crtl`+`alt`+`-`  
 * Pipes `%>%` - `crtl`+`shift`+`m`  
+* Transformar em comentário `#` - `crtl`+`shift`+`c`  
 * Inserir chunks - `crtl`+`alt`+`i` 
+* Inserir secção - `crtl`+`shift`+`r``
 * Knit - `crtl`+`shift`+`k`
 * Restart R - `crtl`+`shift`+`F10`  
 * Quit R - `crtl`+`q`  
@@ -814,6 +816,14 @@ ggplot(TODOS, aes(factor(TODOS$CHANGE_Class3, levels=rev(levels(TODOS$CHANGE_Cla
        y=element_blank())+scale_y_continuous(labels = scales::percent) 
 ```
 
+```
+## Warning: Use of `TODOS$CHANGE_Class3` is discouraged. Use `CHANGE_Class3`
+## instead.
+
+## Warning: Use of `TODOS$CHANGE_Class3` is discouraged. Use `CHANGE_Class3`
+## instead.
+```
+
 ![](README_figs/README-plot barras stacked-2.png)<!-- -->
 
 ```r
@@ -924,16 +934,16 @@ ggplot(CONTAGENSevolucao, aes(x=Ano, y=Ciclistas, fill=factor(Gira, levels=c("Tr
 
 Table: Exemplo dos dados em melt
 
-Local           Gira                     Ano   Ciclistas   VolumeGIRA   Trotinetas
---------------  ---------------------  -----  ----------  -----------  -----------
-Campo Pequeno   Bicicleta própria       2018         221          265            0
-Campo Pequeno   Bicicleta partilhada    2018         265            0            0
-Campo Pequeno   Bicicleta própria       2019         255          201          149
-Campo Pequeno   Bicicleta partilhada    2019         201            0            0
-Campo Pequeno   Trotinetas              2019         149            0            0
-Campo Pequeno   Bicicleta partilhada    2016           0            0            0
-Campo Pequeno   Bicicleta partilhada    2017           0            0            0
-Campo Pequeno   Trotinetas              2016           0            0            0
+|Local         |Gira                 |  Ano| Ciclistas| VolumeGIRA| Trotinetas|
+|:-------------|:--------------------|----:|---------:|----------:|----------:|
+|Campo Pequeno |Bicicleta própria    | 2018|       221|        265|          0|
+|Campo Pequeno |Bicicleta partilhada | 2018|       265|          0|          0|
+|Campo Pequeno |Bicicleta própria    | 2019|       255|        201|        149|
+|Campo Pequeno |Bicicleta partilhada | 2019|       201|          0|          0|
+|Campo Pequeno |Trotinetas           | 2019|       149|          0|          0|
+|Campo Pequeno |Bicicleta partilhada | 2016|         0|          0|          0|
+|Campo Pequeno |Bicicleta partilhada | 2017|         0|          0|          0|
+|Campo Pequeno |Trotinetas           | 2016|         0|          0|          0|
 
   
 ##Gráficos de bolas  
@@ -1234,7 +1244,7 @@ Exemplos
 ```r
 library(likert)
 Resultyy3 = likert(Personalityyy3)
-plot(Resultyy3, type="bar",centered=F)+ggtitle("Cyclists")
+plot(Resultyy3, type = "bar", centered = F) + ggtitle("Cyclists")
 ```
 
 ![](README_figs/README-plot likert2-1.png)<!-- -->
@@ -1242,10 +1252,8 @@ plot(Resultyy3, type="bar",centered=F)+ggtitle("Cyclists")
 ```r
 ResultyG_1 <- likert(Personalityyy[c(1:6)], grouping=Personalityyy$CHANGE_Class3)
 ResultyGs_1 <- likert(summary = ResultyG_1$results, grouping = ResultyG_1$results[,1])
-plot(ResultyGs_1, type="bar", centered=FALSE)
+# plot(ResultyGs_1, type="bar", centered=FALSE) # resolver!
 ```
-
-![](README_figs/README-plot likert3-1.png)<!-- -->
 
 
 #Modelação
@@ -1278,8 +1286,10 @@ DescStat<-dfSummary(TODOS[,c(3,4,8,15)])
 view(DescStat) #abrir o botão do view pane para o browser, guardar como html
 ```
 <style type="text/css">
- img {   background-color: transparent;   border: 0; }  .st-table td, .st-table th {   padding: 8px; }  .st-table > thead > tr {    background-color: #eeeeee; }  .st-cross-table td {   text-align: center; }  .st-descr-table td {   text-align: right; }  .st-small {   font-size: 13px; }  .st-small td, .st-small th {   padding: 8px; }  table.st-table th {   text-align: center; }  .st-small > thead > tr > th, .st-small > tbody > tr > th, .st-small > tfoot > tr > th, .st-small > thead > tr > td, .st-small > tbody > tr > td, .st-small > tfoot > tr > td {   padding-left: 12px;   padding-right: 12px; }  table.st-table > thead > tr {    background-color: #eeeeee; }   table.st-table td span {   display: block; }  .st-container {   width: 100%;   padding-right: 15px;   padding-left: 15px;   margin-right: auto;   margin-left: auto;   margin-top: 15px; }  .st-multiline {   white-space: pre; }  .st-table {     width: auto;     table-layout: auto;     margin-top: 20px;     margin-bottom: 20px;     max-width: 100%;     background-color: transparent;     border-collapse: collapse; }   .st-table > thead > tr > th, .st-table > tbody > tr > th, .st-table > tfoot > tr > th, .st-table > thead > tr > td, .st-table > tbody > tr > td, .st-table > tfoot > tr > td {   vertical-align: middle; }  .st-table-bordered {   border: 1px solid #bbbbbb; }  .st-table-bordered > thead > tr > th, .st-table-bordered > tbody > tr > th, .st-table-bordered > tfoot > tr > th, .st-table-bordered > thead > tr > td, .st-table-bordered > tbody > tr > td, .st-table-bordered > tfoot > tr > td {   border: 1px solid #cccccc; }  .st-table-bordered > thead > tr > th, .st-table-bordered > thead > tr > td, .st-table thead > tr > th {   border-bottom: none; }  .st-freq-table > thead > tr > th, .st-freq-table > tbody > tr > th, .st-freq-table > tfoot > tr > th, .st-freq-table > thead > tr > td, .st-freq-table > tbody > tr > td, .st-freq-table > tfoot > tr > td, .st-freq-table-nomiss > thead > tr > th, .st-freq-table-nomiss > tbody > tr > th, .st-freq-table-nomiss > tfoot > tr > th, .st-freq-table-nomiss > thead > tr > td, .st-freq-table-nomiss > tbody > tr > td, .st-freq-table-nomiss > tfoot > tr > td, .st-cross-table > thead > tr > th, .st-cross-table > tbody > tr > th, .st-cross-table > tfoot > tr > th, .st-cross-table > thead > tr > td, .st-cross-table > tbody > tr > td, .st-cross-table > tfoot > tr > td {   padding-left: 20px;   padding-right: 20px; }     .st-table-bordered > thead > tr > th, .st-table-bordered > tbody > tr > th, .st-table-bordered > thead > tr > td, .st-table-bordered > tbody > tr > td {   border: 1px solid #cccccc; }  .st-table-striped > tbody > tr:nth-of-type(odd) {   background-color: #ffffff; }  .st-table-striped > tbody > tr:nth-of-type(even) {   background-color: #f9f9f9; }   .st-descr-table > thead > tr > th, .st-descr-table > tbody > tr > th, .st-descr-table > tfoot > tr > th, .st-descr-table > thead > tr > td, .st-descr-table > tbody > tr > td, .st-descr-table > tfoot > tr > td {   padding-left: 24px;   padding-right: 24px;   word-wrap: break-word; }  .st-freq-table, .st-freq-table-nomiss, .st-cross-table {   border: medium none; }  .st-freq-table > thead > tr:nth-child(1) > th:nth-child(1), .st-cross-table > thead > tr:nth-child(1) > th:nth-child(1), .st-cross-table > thead > tr:nth-child(1) > th:nth-child(3) {   border: none;   background-color: #ffffff;   text-align: center; }  .st-protect-top-border {   border-top: 1px solid #cccccc !important; }  .st-ws-char {   display: inline;   color: #999999;   letter-spacing: 0.2em; } </style>
-<!--html_preserve--><div class="container st-container">
+ img {   background-color: transparent;   border: 0; }  .st-table td, .st-table th {   padding: 8px; }  .st-table > thead > tr {    background-color: #eeeeee; }  .st-cross-table td {   text-align: center; }  .st-descr-table td {   text-align: right; }  table.st-table th {   text-align: center; }  table.st-table > thead > tr {    background-color: #eeeeee; }  table.st-table td span {   display: block; }  table.st-table > tfoot > tr > td {   border:none; }  .st-container {   width: 100%;   padding-right: 15px;   padding-left: 15px;   margin-right: auto;   margin-left: auto;   margin-top: 15px; }  .st-multiline {   white-space: pre; }  .st-table {     width: auto;     table-layout: auto;     margin-top: 20px;     margin-bottom: 20px;     max-width: 100%;     background-color: transparent;     border-collapse: collapse; }  .st-table > thead > tr > th, .st-table > tbody > tr > th, .st-table > tfoot > tr > th, .st-table > thead > tr > td, .st-table > tbody > tr > td, .st-table > tfoot > tr > td {   vertical-align: middle; }  .st-table-bordered {   border: 1px solid #bbbbbb; }  .st-table-bordered > thead > tr > th, .st-table-bordered > tbody > tr > th, .st-table-bordered > thead > tr > td, .st-table-bordered > tbody > tr > td {   border: 1px solid #cccccc; }  .st-table-bordered > thead > tr > th, .st-table-bordered > thead > tr > td, .st-table thead > tr > th {   border-bottom: none; }  .st-freq-table > thead > tr > th, .st-freq-table > tbody > tr > th, .st-freq-table > tfoot > tr > th, .st-freq-table > thead > tr > td, .st-freq-table > tbody > tr > td, .st-freq-table > tfoot > tr > td, .st-freq-table-nomiss > thead > tr > th, .st-freq-table-nomiss > tbody > tr > th, .st-freq-table-nomiss > tfoot > tr > th, .st-freq-table-nomiss > thead > tr > td, .st-freq-table-nomiss > tbody > tr > td, .st-freq-table-nomiss > tfoot > tr > td, .st-cross-table > thead > tr > th, .st-cross-table > tbody > tr > th, .st-cross-table > tfoot > tr > th, .st-cross-table > thead > tr > td, .st-cross-table > tbody > tr > td, .st-cross-table > tfoot > tr > td {   padding-left: 20px;   padding-right: 20px; }  .st-table-bordered > thead > tr > th, .st-table-bordered > tbody > tr > th, .st-table-bordered > thead > tr > td, .st-table-bordered > tbody > tr > td {   border: 1px solid #cccccc; }  .st-table-striped > tbody > tr:nth-of-type(odd) {   background-color: #ffffff; }  .st-table-striped > tbody > tr:nth-of-type(even) {   background-color: #f9f9f9; }  .st-descr-table > thead > tr > th, .st-descr-table > tbody > tr > th, .st-descr-table > thead > tr > td, .st-descr-table > tbody > tr > td {   padding-left: 24px;   padding-right: 24px;   word-wrap: break-word; }  .st-freq-table, .st-freq-table-nomiss, .st-cross-table {   border: medium none; }  .st-freq-table > thead > tr:nth-child(1) > th:nth-child(1), .st-cross-table > thead > tr:nth-child(1) > th:nth-child(1), .st-cross-table > thead > tr:nth-child(1) > th:nth-child(3) {   border: none;   background-color: #ffffff;   text-align: center; }  .st-protect-top-border {   border-top: 1px solid #cccccc !important; }  .st-ws-char {   display: inline;   color: #999999;   letter-spacing: 0.2em; }  /* Optional classes */ .st-small {   font-size: 13px; }  .st-small td, .st-small th {   padding: 8px; }  .st-small > thead > tr > th, .st-small > tbody > tr > th, .st-small > thead > tr > td, .st-small > tbody > tr > td {   padding-left: 12px;   padding-right: 12px; } </style>
+
+```{=html}
+<div class="container st-container">
 <h3>Data Frame Summary</h3>
 <strong>
 TODOS
@@ -1291,13 +1301,13 @@ TODOS
 <table class="table table-striped table-bordered st-table st-table-striped st-table-bordered st-multiline ">
   <thead>
     <tr>
-      <th align="center" class="no st-protect-top-border"><strong>No</strong></th>
-      <th align="center" class="variable st-protect-top-border"><strong>Variable</strong></th>
-      <th align="center" class="stats.values st-protect-top-border"><strong>Stats / Values</strong></th>
-      <th align="center" class="freqs.pct.valid st-protect-top-border"><strong>Freqs (% of Valid)</strong></th>
-      <th align="center" class="graph st-protect-top-border"><strong>Graph</strong></th>
-      <th align="center" class="valid st-protect-top-border"><strong>Valid</strong></th>
-      <th align="center" class="missing st-protect-top-border"><strong>Missing</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>No</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Variable</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Stats / Values</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Freqs (% of Valid)</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Graph</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Valid</strong></th>
+      <th align="center" class="st-protect-top-border"><strong>Missing</strong></th>
     </tr>
   </thead>
   <tbody>
@@ -1305,12 +1315,9 @@ TODOS
       <td align="center">1</td>
       <td align="left">Age
 [integer]</td>
-      <td align="left">Mean (sd) : 39.6 (11)
-min < med < max:
-16 < 39 < 83
-IQR (CV) : 15 (0.3)</td>
+      <td align="left" style="padding:8;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">Mean (sd) : 39.6 (11)</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">min &le; med &le; max:</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">16 &le; 39 &le; 83</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">IQR (CV) : 15 (0.3)</td></tr></table></td>
       <td align="left" style="vertical-align:middle">60 distinct values</td>
-      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAKhJREFUaN7t1sENgCAMhWFWwA3UDWT/3RQOaggUWkk05n8Hw+lLk9Kic8QSX8gSM3tFBGwNR8DAwL6Jqaa9hanKAxuFpR6Owi4HDAzsI1g248+wzAEDAwN7G0s7bhQWPxsYGBiYDuvYQ/1YaJd3x0r/eWas5oD9FJNvrhKTywMDAwN7HxOfTC0mOjlWXbcWrFoemIyVumDGSuWBdWBnF6Z0us/m4zhiyQ62nh/6jRAyZgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent;"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAKhJREFUaN7t1sENgCAMhWFWwA3UDWT/3RQOaggUWkk05n8Hw+lLk9Kic8QSX8gSM3tFBGwNR8DAwL6Jqaa9hanKAxuFpR6Owi4HDAzsI1g248+wzAEDAwN7G0s7bhQWPxsYGBiYDuvYQ/1YaJd3x0r/eWas5oD9FJNvrhKTywMDAwN7HxOfTC0mOjlWXbcWrFoemIyVumDGSuWBdWBnF6Z0us/m4zhiyQ62nh/6jRAyZgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
       <td align="center">1079
 (100%)</td>
       <td align="center">0
@@ -1320,11 +1327,9 @@ IQR (CV) : 15 (0.3)</td>
       <td align="center">2</td>
       <td align="left">Gender
 [factor]</td>
-      <td align="left">1. Male
-2. Female
-3. Other</td>
+      <td align="left" style="padding:8;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">1. Male</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">2. Female</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">3. Other</td></tr></table></td>
       <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">519</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">48.1%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">557</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">51.6%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">3</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">0.3%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
-      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFoAAABQBAMAAABrHX9XAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAE5JREFUSMft1MEJACAIQNFWcARrg9x/tzp0TwlC4f/zuyhoa3XrjlTk6GH30Gj0q47dpfhKpz1T7gIbNJtoNPqjjl1xnu8T04pGo4vrii0NwIcKfKw8lwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent;"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFoAAABQBAMAAABrHX9XAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAE5JREFUSMft1MEJACAIQNFWcARrg9x/tzp0TwlC4f/zuyhoa3XrjlTk6GH30Gj0q47dpfhKpz1T7gIbNJtoNPqjjl1xnu8T04pGo4vrii0NwIcKfKw8lwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
       <td align="center">1079
 (100%)</td>
       <td align="center">0
@@ -1334,11 +1339,9 @@ IQR (CV) : 15 (0.3)</td>
       <td align="center">3</td>
       <td align="left">Income
 [ordered, factor]</td>
-      <td align="left">1. Live with difficulties
-2. Live with moderate ease
-3. Live without difficulties</td>
+      <td align="left" style="padding:8;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">1. Live with difficulties</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">2. Live with moderate ease</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">3. Live without difficulties</td></tr></table></td>
       <td align="left" style="padding:0;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">79</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">8.0%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">529</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">53.2%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr><tr style="background-color:transparent"><td style="padding:0 5px 0 7px;margin:0;border:0" align="right">386</td><td style="padding:0 2px 0 0;border:0;" align="left">(</td><td style="padding:0;border:0" align="right">38.8%</td><td style="padding:0 4px 0 2px;border:0" align="left">)</td></tr></table></td>
-      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFwAAABQBAMAAABmAw8QAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAFdJREFUSMdjYBjaQAkMFAUJAahyZWMQGFU+qnxUOd2Vk5hXCaobxMqViAQoAUkQGI0qH1U+qnxglZOYtQdVsUTNUkwRQznegBxVPqp8VDntlJOYV4cqAACzn4rEzoWdkQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent;"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAFwAAABQBAMAAABmAw8QAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqb39/f///+DdZCQAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAFdJREFUSMdjYBjaQAkMFAUJAahyZWMQGFU+qnxUOd2Vk5hXCaobxMqViAQoAUkQGI0qH1U+qnxglZOYtQdVsUTNUkwRQznegBxVPqp8VDntlJOYV4cqAACzn4rEzoWdkQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0wMlQxODowOTowMCswMDowMHl4HAoAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDAIJaS2AAAAAElFTkSuQmCC"></td>
       <td align="center">994
 (92.12%)</td>
       <td align="center">85
@@ -1348,12 +1351,9 @@ IQR (CV) : 15 (0.3)</td>
       <td align="center">4</td>
       <td align="left">lenght
 [numeric]</td>
-      <td align="left">Mean (sd) : 8539 (8446.6)
-min < med < max:
-0 < 5922.2 < 62056.5
-IQR (CV) : 7684.9 (1)</td>
+      <td align="left" style="padding:8;vertical-align:middle"><table style="border-collapse:collapse;border:none;margin:0"><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">Mean (sd) : 8539 (8446.6)</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">min &le; med &le; max:</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">0 &le; 5922.2 &le; 62056.5</td></tr><tr style="background-color:transparent"><td style="padding:0;margin:0;border:0" align="left">IQR (CV) : 7684.9 (1)</td></tr></table></td>
       <td align="left" style="vertical-align:middle">944 distinct values</td>
-      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAI5JREFUaN7t2cENgCAMhWFW0A2EDWT/3VTkYCAKLajR/O9AwuVLD6WBYAzRxIYMjYmY82tmMDAwMDAwMLA7sXB7mTph2+LBwMDAwMDAwMDAwMDAHsYannY55vTlgYH9BdP99pxg+x7sZUw6Jy8x6RgvY4LyypjgRHweqzurldihVXphSfONKR4x2yWGaLIAqwGC8JpY/y0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDB5eBwKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE5LTEyLTAyVDE4OjA5OjAwKzAwOjAwCCWktgAAAABJRU5ErkJggg=="></td>
+      <td align="left" style="vertical-align:middle;padding:0;background-color:transparent;"><img style="border:none;background-color:transparent;padding:0" src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAJgAAABuBAMAAAApJ8cWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAD1BMVEX////9/v2mpqby8vL///8shn5hAAAAAnRSTlMAAHaTzTgAAAABYktHRACIBR1IAAAAB3RJTUUH4wwCEgkA/Z0qUQAAAI5JREFUaN7t2cENgCAMhWFW0A2EDWT/3VTkYCAKLajR/O9AwuVLD6WBYAzRxIYMjYmY82tmMDAwMDAwMLA7sXB7mTph2+LBwMDAwMDAwMDAwMDAHsYannY55vTlgYH9BdP99pxg+x7sZUw6Jy8x6RgvY4LyypjgRHweqzurldihVXphSfONKR4x2yWGaLIAqwGC8JpY/y0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMTktMTItMDJUMTg6MDk6MDArMDA6MDB5eBwKAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE5LTEyLTAyVDE4OjA5OjAwKzAwOjAwCCWktgAAAABJRU5ErkJggg=="></td>
       <td align="center">962
 (89.16%)</td>
       <td align="center">117
@@ -1361,7 +1361,8 @@ IQR (CV) : 7684.9 (1)</td>
     </tr>
   </tbody>
 </table>
-</div><!--/html_preserve-->
+</div>
+```
 
 
 ##Matrizes de correlação, em plots bonitos
@@ -1396,22 +1397,28 @@ heatmap(x = res, col = col, symm = TRUE)
 
 
 ```r
-res<-cor(PERSONALITY[c(1:18)], method = "spearman", use = "complete.obs")
+# res<-cor(PERSONALITY[c(1:18)], method = "spearman", use = "complete.obs")
 #round(res,2)
-res2 <- rcorr(as.matrix(PERSONALITY[c(1:18)],method = "spearman", use = "complete.obs")) #agora com p-values
 
-corrplot(res, p.mat = res2$P, type = "upper", order = "FPC", method = "color",
-         insig = "pch", pch.cex = .9,tl.col = "black")
+res2 <- rcorr(as.matrix(PERSONALITY[c(1:18)], type = "spearman")) #agora com p-values
+# corrplot(
+#   corr = res2$r,
+#   p.mat = res2$P,
+#   type = "upper",
+#   order = "FPC",
+#   method = "color",
+#   insig = "pch",
+#   sig.level = 1 - 0.95,
+#   pch.cex = .9,
+#   tl.col = "black",
+#   # is.corr = TRUE
+# )
+
+col<- colorRampPalette(c("blue", "white", "red"))(20)
+heatmap(x = res2$r, col = col, symm = TRUE)
 ```
 
 ![](README_figs/README-corr plot-1.png)<!-- -->
-
-```r
-col<- colorRampPalette(c("blue", "white", "red"))(20)
-heatmap(x = res, col = col, symm = TRUE)
-```
-
-![](README_figs/README-corr plot-2.png)<!-- -->
 
 
 ##Modelo regressão linear
@@ -2176,6 +2183,7 @@ Usar o [stplanr](https://docs.ropensci.org/stplanr/reference/overline2.html) par
 ```r
 #tendo calculado as rotas de bicicleta de casa dos alunos até à escola D, no QGIS
 library(stplanr)
+library(sf)
 sl = RouteD[RouteD$DIST_KM>0.5 & RouteD$DIST_KM<4 ,] #filtrar só aqueles a mais de 500m e menos de 4km
 sl$alunos = 1 #cada route tem 1 aluno a fazer (para depois agregar)
 rnetD = overline2(sl, "alunos") #partir as rotas em segmentos e somá-los
